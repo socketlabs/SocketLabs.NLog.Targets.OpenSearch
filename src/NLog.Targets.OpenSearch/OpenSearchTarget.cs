@@ -198,6 +198,8 @@ namespace NLog.Targets.OpenSearch
 
                 if (!result.IsValid)
                 {
+                    InternalLogger.Log(LogLevel.Error, result.DebugInformation);
+
                     foreach (var item in result.ItemsWithErrors)
                     {
                         InternalLogger.Log(LogLevel.Error, "Error adding log: {0} Index: {1} StatusCode: {2}", item.Error.Reason, item.Index, item.Status);
