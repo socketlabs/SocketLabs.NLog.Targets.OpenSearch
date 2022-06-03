@@ -1,11 +1,12 @@
-﻿using Elasticsearch.Net;
-using Nest;
-using Nest.JsonNetSerializer;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
+using OpenSearch.Net;
+using Osc;
+using Osc.JsonNetSerializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace NLog.Targets.OpenSearch
     {
         private string[] _uris;
         private char[] _split = new char[] { ',' };
-        private ElasticClient _client;
+        private OpenSearchClient _client;
 
         public string Username { get; set; }
         public string Password { get; set; }
@@ -151,7 +152,7 @@ namespace NLog.Targets.OpenSearch
                 });
             }
 
-            _client = new ElasticClient(connectionSettings);
+            _client = new OpenSearchClient(connectionSettings);
         }
 
         protected override async Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
@@ -172,7 +173,10 @@ namespace NLog.Targets.OpenSearch
                     {
                         if (IncludeEventProperties)
                         {
-                            return GetAllProperties(log);
+                            var properties = GetAllProperties(log);
+                            FilterProperties(properties);
+                            FixProperties(properties);
+                            return properties;
                         }
 
                         return null;
@@ -209,6 +213,37 @@ namespace NLog.Targets.OpenSearch
             catch (Exception ex)
             {
                 InternalLogger.Log(ex, LogLevel.Error, "Error performing indexing operation");
+            }
+        }
+
+        private void FilterProperties(IDictionary<string, object> properties)
+        {
+            properties.Remove("EventId_Id");
+            properties.Remove("EventId_Name");
+
+            foreach (var item in properties)
+            {
+                if (item.Value == null)
+                {
+                    properties.Remove(item);
+                }
+            }
+        }
+
+        private void FixProperties(IDictionary<string, object> properties)
+        {
+            if (properties.TryGetValue("EventId", out var value))
+            {
+                if (value is EventId)
+                {
+                    var eventId = (EventId)value;
+                    properties["EventId"] = eventId.Id;
+
+                    if (!String.IsNullOrEmpty(eventId.Name))
+                    {
+                        properties.Add("EventName", eventId.Name);
+                    }
+                }
             }
         }
 
