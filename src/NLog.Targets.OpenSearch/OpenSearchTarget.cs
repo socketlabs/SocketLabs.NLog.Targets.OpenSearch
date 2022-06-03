@@ -1,11 +1,11 @@
-﻿using Elasticsearch.Net;
-using Nest;
-using Nest.JsonNetSerializer;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
+using OpenSearch.Net;
+using Osc;
+using Osc.JsonNetSerializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +20,7 @@ namespace NLog.Targets.OpenSearch
     {
         private string[] _uris;
         private char[] _split = new char[] { ',' };
-        private ElasticClient _client;
+        private OpenSearchClient _client;
 
         public string Username { get; set; }
         public string Password { get; set; }
@@ -151,7 +151,7 @@ namespace NLog.Targets.OpenSearch
                 });
             }
 
-            _client = new ElasticClient(connectionSettings);
+            _client = new OpenSearchClient(connectionSettings);
         }
 
         protected override async Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461;net48;net5.0;net6.0</TargetFrameworks>
     <Company>SocketLabs</Company>
     <Description>NLog Target for OpenSearch</Description>
     <Copyright>2022 SocketLabs Acquisition LLC</Copyright>
@@ -20,9 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NEST" Version="7.10.0" />
-    <PackageReference Include="NEST.JsonNetSerializer" Version="7.10.0" />
     <PackageReference Include="NLog" Version="4.7.13" />
+    <PackageReference Include="Osc" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Osc.JsonNetSerializer\Osc.JsonNetSerializer.csproj" />
   </ItemGroup>
 
 </Project>
