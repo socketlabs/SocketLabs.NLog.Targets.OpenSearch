@@ -118,7 +118,11 @@ namespace NLog.Targets.OpenSearch
                 (builtin, settings) => new JsonNetSerializer(
                     builtin,
                     settings,
-                    () => new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore },
+                    () => new JsonSerializerSettings() 
+                    { 
+                        NullValueHandling = NullValueHandling.Ignore,
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    },
                     contractJsonConverters: new JsonConverter[] { new StringEnumConverter() }
                     ))
                 .RequestTimeout(TimeSpan.FromMinutes(2));
