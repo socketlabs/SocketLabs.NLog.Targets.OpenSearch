@@ -1,4 +1,5 @@
 ﻿using Elasticsearch.Net;
+using Microsoft.Extensions.Logging;
 using Nest;
 using Nest.JsonNetSerializer;
 using Newtonsoft.Json;
