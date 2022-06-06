@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog.Common;
 using NLog.Config;
@@ -173,10 +172,7 @@ namespace NLog.Targets.OpenSearch
                     {
                         if (IncludeEventProperties)
                         {
-                            var properties = GetAllProperties(log);
-                            FilterProperties(properties);
-                            FixProperties(properties);
-                            return properties;
+                            return GetAllProperties(log);
                         }
 
                         return null;
@@ -213,37 +209,6 @@ namespace NLog.Targets.OpenSearch
             catch (Exception ex)
             {
                 InternalLogger.Log(ex, LogLevel.Error, "Error performing indexing operation");
-            }
-        }
-
-        private void FilterProperties(IDictionary<string, object> properties)
-        {
-            properties.Remove("EventId_Id");
-            properties.Remove("EventId_Name");
-
-            foreach (var item in properties)
-            {
-                if (item.Value == null)
-                {
-                    properties.Remove(item);
-                }
-            }
-        }
-
-        private void FixProperties(IDictionary<string, object> properties)
-        {
-            if (properties.TryGetValue("EventId", out var value))
-            {
-                if (value is EventId)
-                {
-                    var eventId = (EventId)value;
-                    properties["EventId"] = eventId.Id;
-
-                    if (!String.IsNullOrEmpty(eventId.Name))
-                    {
-                        properties.Add("EventName", eventId.Name);
-                    }
-                }
             }
         }
 
