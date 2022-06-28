@@ -200,13 +200,16 @@ namespace NLog.Targets.OpenSearch
                     InternalLogger.Log(LogLevel.Error, result.ServerError.Error.Reason);
                 }
 
-                if (!result.IsValid)
+                // TODO: Once the client is updated and can handle a valid response this status
+                // 201 check can be removed.
+                if (!result.IsValid && result.ItemsWithErrors.All(x => x.Status != 201))
                 {
                     InternalLogger.Log(LogLevel.Error, result.DebugInformation);
 
-                    foreach (var item in result.ItemsWithErrors)
+                    foreach (var item in result.ItemsWithErrors.Where(x => x.Status != 201))
                     {
-                        InternalLogger.Log(LogLevel.Error, "Error adding log: {0} Index: {1} StatusCode: {2}", item.Error.Reason, item.Index, item.Status);
+                        if (item.Error == null) continue;
+                        InternalLogger.Log(LogLevel.Error, "Error adding log: {0} Index: {1} StatusCode: {2}", item.Error?.Reason, item.Index, item.Status);
                     }
                 }
             }
