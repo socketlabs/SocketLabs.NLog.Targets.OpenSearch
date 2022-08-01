@@ -1,4 +1,10 @@
-﻿using Elasticsearch.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Elasticsearch.Net;
 using Microsoft.Extensions.Logging;
 using Nest;
 using Nest.JsonNetSerializer;
@@ -7,12 +13,6 @@ using Newtonsoft.Json.Converters;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NLog.Targets.OpenSearch
 {
@@ -118,7 +118,11 @@ namespace NLog.Targets.OpenSearch
                 (builtin, settings) => new JsonNetSerializer(
                     builtin,
                     settings,
-                    () => new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore },
+                    () => new JsonSerializerSettings()
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    },
                     contractJsonConverters: new JsonConverter[] { new StringEnumConverter() }
                     ))
                 .RequestTimeout(TimeSpan.FromMinutes(2));
