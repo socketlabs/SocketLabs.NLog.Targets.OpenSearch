@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace NLog.Targets.OpenSearch.Converters
 {
-    internal class LogLevelConverter : JsonConverter<LogLevel>
+    public class LogLevelConverter : JsonConverter<LogLevel>
     {
         public override LogLevel Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

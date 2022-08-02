@@ -144,6 +144,10 @@ namespace NLog.Targets.OpenSearch
                 {
                     properties.Remove(item);
                 }
+                else if (item.GetType() == typeof(Type))
+                {
+                    properties.Remove(item);
+                }
             }
         }
 

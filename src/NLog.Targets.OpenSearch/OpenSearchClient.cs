@@ -45,7 +45,7 @@ namespace NLog.Targets.OpenSearch
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
             };
-            _jsonSerializerOptions.Converters.Add(new TypeConverter());
+            _jsonSerializerOptions.Converters.Add(new IgnoreConverter());
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
