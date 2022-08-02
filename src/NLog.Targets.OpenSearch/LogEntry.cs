@@ -1,8 +1,7 @@
-﻿using Nest;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace NLog.Targets.OpenSearch
 {
@@ -19,7 +18,7 @@ namespace NLog.Targets.OpenSearch
         public StackTrace StackTrace { get;  set; }
         public DateTime TimeStamp { get;  set; }
 
-        [Ignore]
+        [JsonIgnore]
         public string Index { get;  set; }
         public IDictionary<string, object> Properties { get; set; }
     }
