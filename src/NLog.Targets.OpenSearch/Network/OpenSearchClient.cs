@@ -23,6 +23,7 @@ namespace NLog.Targets.OpenSearch.Network
         private readonly RecyclableMemoryStreamManager _memoryStreamManager;
         private readonly string[] _opensearchHosts;
         private readonly bool _useCompression;
+        private readonly Action<Exception, LogLevel, string> _onLog;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
 
         public OpenSearchClient(
@@ -31,7 +32,8 @@ namespace NLog.Targets.OpenSearch.Network
             bool useCompression,
             string certificateThumbprint = null,
             string openSearchUser = null,
-            string openSearchPass = null
+            string openSearchPass = null,
+            Action<Exception, LogLevel, string> onLog = null
             )
         {
             _client = new HttpClient(ConfigureClientHandler(certificateThumbprint));
@@ -42,13 +44,16 @@ namespace NLog.Targets.OpenSearch.Network
             _memoryStreamManager = memoryStreamManager;
             _opensearchHosts = opensearchHosts;
             _useCompression = useCompression;
+            _onLog = onLog;
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
             };
             _jsonSerializerOptions.Converters.Add(new IgnoreTypeConverter());
+            _jsonSerializerOptions.Converters.Add(new RouteEndpointConverter());
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
@@ -77,12 +82,17 @@ namespace NLog.Targets.OpenSearch.Network
                     var bulkIndexItem = new BulkItemDescriptor();
                     var itemDescriptor = bulkItem(item, bulkIndexItem);
                     var op = new { index = itemDescriptor };
-                    await JsonSerializer.SerializeAsync(stream, op, _jsonSerializerOptions, token);
-                    await stream.WriteAsync(_newline, 0, _newline.Length);
-                    await JsonSerializer.SerializeAsync(stream, item, _jsonSerializerOptions, token);
-                    await stream.WriteAsync(_newline, 0, _newline.Length);
-
-                    var json = JsonSerializer.Serialize(item, _jsonSerializerOptions);
+                    try
+                    {
+                        await JsonSerializer.SerializeAsync(stream, op, _jsonSerializerOptions, token);
+                        await stream.WriteAsync(_newline, 0, _newline.Length);
+                        await JsonSerializer.SerializeAsync(stream, item, _jsonSerializerOptions, token);
+                        await stream.WriteAsync(_newline, 0, _newline.Length);
+                    }
+                    catch (Exception ex)
+                    {
+                        _onLog.Invoke(ex, LogLevel.Error, "Error serializing object.");
+                    }
                 }
 
                 await stream.FlushAsync(token);
