@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace NLog.Targets.OpenSearch.Converters
 {
-    public class IgnoreConverter : JsonConverter<Type>
+    internal class IgnoreTypeConverter : JsonConverter<Type>
     {
         public override Type Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

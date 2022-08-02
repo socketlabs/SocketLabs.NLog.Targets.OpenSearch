@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Models
 {
-    public class BulkIndexResponse
+    internal class BulkIndexResponse
     {
         public long Took { get; set; }
         public bool Errors { get; set; }

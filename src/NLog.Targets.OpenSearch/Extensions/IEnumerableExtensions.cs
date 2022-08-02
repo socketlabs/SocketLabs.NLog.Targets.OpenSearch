@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Extensions
 {
     internal static class IEnumerableExtensions
     {

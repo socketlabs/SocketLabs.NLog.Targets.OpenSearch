@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Models
 {
-    public class Error
+    internal class Error
     {
         public string Type { get; set; }
         public string Reason { get; set; }

@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Utilities
 {
     internal class ReadOnlyMemoryContent : HttpContent
     {

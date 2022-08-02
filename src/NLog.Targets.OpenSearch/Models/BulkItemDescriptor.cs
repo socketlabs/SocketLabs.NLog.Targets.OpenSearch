@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Models
 {
-    public class BulkItemDescriptor
+    internal class BulkItemDescriptor
     {
         public BulkItemDescriptor()
         {

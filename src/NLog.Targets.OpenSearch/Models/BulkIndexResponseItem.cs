@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Models
 {
-    public class BulkIndexResponseItem
+    internal class BulkIndexResponseItem
     {
         //
         // Summary:

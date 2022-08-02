@@ -10,10 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IO;
 using NLog.Targets.OpenSearch.Converters;
+using NLog.Targets.OpenSearch.Extensions;
+using NLog.Targets.OpenSearch.Models;
+using NLog.Targets.OpenSearch.Utilities;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Network
 {
-    public class OpenSearchClient : IOpenSearchClient
+    internal class OpenSearchClient : IOpenSearchClient
     {
         private static byte[] _newline = new byte[] { (byte)'\n' };
         private readonly HttpClient _client;
@@ -33,7 +36,7 @@ namespace NLog.Targets.OpenSearch
         {
             _client = new HttpClient(ConfigureClientHandler(certificateThumbprint));
 
-            if (!String.IsNullOrEmpty(openSearchUser) && !String.IsNullOrEmpty(openSearchPass))
+            if (!string.IsNullOrEmpty(openSearchUser) && !string.IsNullOrEmpty(openSearchPass))
                 _client.DefaultRequestHeaders.Authorization = new BasicAuthenticationHeaderValue(openSearchUser, openSearchPass);
 
             _memoryStreamManager = memoryStreamManager;
@@ -45,7 +48,7 @@ namespace NLog.Targets.OpenSearch
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
             };
-            _jsonSerializerOptions.Converters.Add(new IgnoreConverter());
+            _jsonSerializerOptions.Converters.Add(new IgnoreTypeConverter());
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
@@ -53,9 +56,9 @@ namespace NLog.Targets.OpenSearch
 
         public async Task<BulkIndexResponse> BulkIndexAsync<T>(IEnumerable<T> items, Func<T, BulkItemDescriptor, BulkItemDescriptor> bulkItem, CancellationToken token) where T : class
         {
-            Stream stream = null;       
+            Stream stream = null;
             try
-            
+
             {
                 var ms = _memoryStreamManager.GetStream() as RecyclableMemoryStream;
 
@@ -100,7 +103,7 @@ namespace NLog.Targets.OpenSearch
                         ms.Position = 0;
                         var request = new HttpRequestMessage(HttpMethod.Post, $"{host}/_bulk");
 #if NET5_0_OR_GREATER
-                    request.Content = new System.Net.Http.ReadOnlyMemoryContent(buffer.AsMemory());
+                        request.Content = new System.Net.Http.ReadOnlyMemoryContent(buffer.AsMemory());
 #else
                         request.Content = new ReadOnlyMemoryContent(buffer.AsMemory());
 #endif
@@ -145,7 +148,7 @@ namespace NLog.Targets.OpenSearch
                 ServerCertificateCustomValidationCallback =
                 (httpRequestMessage, cert, certChain, policyErrors) =>
                 {
-                    if (!String.IsNullOrEmpty(certificateThumbprint))
+                    if (!string.IsNullOrEmpty(certificateThumbprint))
                     {
                         return cert.Thumbprint.Equals(certificateThumbprint, StringComparison.OrdinalIgnoreCase);
                     }

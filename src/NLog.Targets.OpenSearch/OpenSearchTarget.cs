@@ -8,6 +8,8 @@ using Microsoft.IO;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
+using NLog.Targets.OpenSearch.Extensions;
+using NLog.Targets.OpenSearch.Network;
 
 namespace NLog.Targets.OpenSearch
 {
@@ -129,7 +131,9 @@ namespace NLog.Targets.OpenSearch
             }
             catch (Exception ex)
             {
-                InternalLogger.Log(ex, LogLevel.Error, "Error performing indexing operation");
+                InternalLogger.Log(ex, LogLevel.Error, "Error performing indexing operation.");
+                if (ex.InnerException != null)
+                    InternalLogger.Log(ex.InnerException, LogLevel.Error, "Inner Exception: ");
             }
         }
 

@@ -1,6 +1,6 @@
-﻿namespace NLog.Targets.OpenSearch
+﻿namespace NLog.Targets.OpenSearch.Models
 {
-    public class ShardStatistics
+    internal class ShardStatistics
     {
         public long Total { get; set; }
         public long Successful { get; set; }
