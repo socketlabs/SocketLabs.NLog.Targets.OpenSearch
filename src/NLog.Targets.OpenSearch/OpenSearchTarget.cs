@@ -78,7 +78,9 @@ namespace NLog.Targets.OpenSearch
             base.InitializeTarget();
             var rmsm = new RecyclableMemoryStreamManager();
 
-            _client = new OpenSearchClient(rmsm, _uris, EnableHttpCompression, CertificateThumprint, Username, Password);
+            Action<Exception, LogLevel, string> onLog = (ex, level, message) => InternalLogger.Log(ex, level, message);
+
+            _client = new OpenSearchClient(rmsm, _uris, EnableHttpCompression, CertificateThumprint, Username, Password, onLog);
         }
 
         protected override async Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
@@ -148,10 +150,6 @@ namespace NLog.Targets.OpenSearch
                 {
                     properties.Remove(item);
                 }
-                else if (item.GetType() == typeof(Type))
-                {
-                    properties.Remove(item);
-                }
             }
         }
 
@@ -159,9 +157,8 @@ namespace NLog.Targets.OpenSearch
         {
             if (properties.TryGetValue("EventId", out var value))
             {
-                if (value is EventId)
+                if (value is EventId eventId)
                 {
-                    var eventId = (EventId)value;
                     properties["EventId"] = eventId.Id;
 
                     if (!String.IsNullOrEmpty(eventId.Name))
