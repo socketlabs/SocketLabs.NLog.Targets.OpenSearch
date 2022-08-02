@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Converters
 {
     internal class LogLevelConverter : JsonConverter<LogLevel>
     {
@@ -12,7 +12,7 @@ namespace NLog.Targets.OpenSearch
         {
             var level = reader.GetString();
 
-            if (!String.IsNullOrEmpty(level))
+            if (!string.IsNullOrEmpty(level))
             {
                 return LogLevel.FromString(level);
             }

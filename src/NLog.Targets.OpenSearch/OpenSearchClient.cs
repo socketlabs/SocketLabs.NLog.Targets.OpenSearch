@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IO;
+using NLog.Targets.OpenSearch.Converters;
 
 namespace NLog.Targets.OpenSearch
 {
@@ -44,6 +45,7 @@ namespace NLog.Targets.OpenSearch
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
             };
+            _jsonSerializerOptions.Converters.Add(new TypeConverter());
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());

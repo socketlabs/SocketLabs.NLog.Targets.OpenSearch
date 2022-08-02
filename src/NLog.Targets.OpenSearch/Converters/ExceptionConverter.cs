@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Converters
 {
     internal class ExceptionConverter : JsonConverter<Exception>
     {
