@@ -8,6 +8,6 @@ namespace NLog.Targets.OpenSearchTests
     {
         public string Foo { get; set; } = "Bar";
         public Type Type { get; set; } = typeof(TestObject);
-        public TestObject ChildTestObject { get; set; } = new TestObject() { Foo = "Baz", ChildTestObject = null };
+        public TestObject ChildTestObject { get; set; }
     }
 }

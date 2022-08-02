@@ -28,7 +28,8 @@ namespace NLog.Targets.OpenSearch.Converters.Tests
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
-            _testObj = new OpenSearchTests.TestObject();
+            _testObj = new TestObject();
+            _testObj.ChildTestObject = new TestObject();
         }
 
         [TestMethod()]
@@ -57,7 +58,13 @@ namespace NLog.Targets.OpenSearch.Converters.Tests
         {
             var converter = new IgnoreConverter();
             var writer = new Utf8JsonWriter(new MemoryStream(), new JsonWriterOptions());
-            converter.Write(writer, _testObj, _jsonSerializerOptions);
+            converter.Write(writer, _testObj.Type, _jsonSerializerOptions);
+        }
+
+        [TestMethod]
+        public void SerializationTest()
+        {
+            var json = JsonSerializer.Serialize(_testObj, _jsonSerializerOptions);
         }
     }
 }
