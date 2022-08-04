@@ -1,13 +1,14 @@
 ﻿using NLog.Layouts;
+using NLog.Targets.OpenSearch.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NLog.Targets.OpenSearch
+namespace NLog.Targets.OpenSearch.Extensions
 {
-    public static class LogEventInfoExtensions
+    internal static class LogEventInfoExtensions
     {
-        public static LogEntry ToLogEntry(this LogEventInfo logEventInfo, Func<string> indexRender, Func<IDictionary<string,object>> propertyRender)
+        public static LogEntry ToLogEntry(this LogEventInfo logEventInfo, Func<string> indexRender, Func<IDictionary<string, object>> propertyRender)
         {
             var entry = new LogEntry()
             {

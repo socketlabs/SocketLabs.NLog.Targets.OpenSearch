@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using Elasticsearch.Net;
 using Microsoft.Extensions.Logging;
-using Nest;
-using Nest.JsonNetSerializer;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Microsoft.IO;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
+using NLog.Targets.OpenSearch.Extensions;
+using NLog.Targets.OpenSearch.Network;
 
 namespace NLog.Targets.OpenSearch
 {
@@ -21,7 +18,7 @@ namespace NLog.Targets.OpenSearch
     {
         private string[] _uris;
         private char[] _split = new char[] { ',' };
-        private ElasticClient _client;
+        private OpenSearchClient _client;
 
         public string Username { get; set; }
         public string Password { get; set; }
@@ -60,18 +57,6 @@ namespace NLog.Targets.OpenSearch
         /// </summary>
         public bool EnableHttpCompression { get; set; }
 
-        /// <summary>
-        /// Gets or sets if exceptions will be rethrown.
-        ///
-        /// Set it to true if the OpenSearch target should throw exceptions.
-        /// </summary>
-        public bool ThrowExceptions { get; set; }
-
-        /// <summary>
-        /// Gets or sets a list of additional fields to add to the OpenSearch document.
-        /// </summary>
-        [ArrayParameter(typeof(Field), "field")]
-        public IList<Field> Fields { get; set; } = new List<Field>();
 
         /// <summary>
         /// Gets or sets whether the OpenSearch client should validate any server certificates.
@@ -83,11 +68,6 @@ namespace NLog.Targets.OpenSearch
         /// </summary>
         public string CertificateThumprint { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the OpenSearch client should use a SniffingConnectionPool.
-        /// </summary>
-        public bool UseSniffingConnection { get; set; }
-
         protected override void CloseTarget()
         {
             base.CloseTarget();
@@ -96,67 +76,11 @@ namespace NLog.Targets.OpenSearch
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
+            var rmsm = new RecyclableMemoryStreamManager();
 
-            if (_uris == null)
-            {
-                Uris = "http://localhost:9200";
-            }
+            Action<Exception, LogLevel, string> onLog = (ex, level, message) => InternalLogger.Log(ex, level, message);
 
-            var uris = _uris.Select(x => new Uri(x));
-            IConnectionPool pool = null;
-
-            if (UseSniffingConnection)
-            {
-                pool = new SniffingConnectionPool(uris);
-            }
-            else
-            {
-                pool = new StaticConnectionPool(uris);
-            }
-
-            var connectionSettings = new ConnectionSettings(pool,
-                (builtin, settings) => new JsonNetSerializer(
-                    builtin,
-                    settings,
-                    () => new JsonSerializerSettings()
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                    },
-                    contractJsonConverters: new JsonConverter[] { new StringEnumConverter() }
-                    ))
-                .RequestTimeout(TimeSpan.FromMinutes(2));
-
-            if (EnableHttpCompression)
-            {
-                connectionSettings.EnableHttpCompression();
-            }
-
-            if (ThrowExceptions)
-            {
-                connectionSettings.ThrowExceptions();
-            }
-
-            if (!String.IsNullOrWhiteSpace(Password))
-            {
-                connectionSettings.BasicAuthentication(Username, Password);
-            }
-
-            if (!ValidateCertificates)
-            {
-                connectionSettings.ServerCertificateValidationCallback((sender, cert, chain, errors) => true);
-            }
-            else if (!String.IsNullOrWhiteSpace(CertificateThumprint))
-            {
-                connectionSettings.ServerCertificateValidationCallback((sender, cert, chain, errors) =>
-                {
-                    var x509 = cert as X509Certificate2;
-                    var isValid = x509.Thumbprint.Equals(CertificateThumprint, StringComparison.OrdinalIgnoreCase);
-                    return isValid;
-                });
-            }
-
-            _client = new ElasticClient(connectionSettings);
+            _client = new OpenSearchClient(rmsm, _uris, EnableHttpCompression, CertificateThumprint, Username, Password, onLog);
         }
 
         protected override async Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
@@ -187,39 +111,31 @@ namespace NLog.Targets.OpenSearch
                     })
                 );
 
-                var result = await _client.BulkAsync((selector) =>
+                var result = await _client.BulkIndexAsync(logs, (doc, descriptor) =>
                 {
-                    selector.IndexMany(logs, (bulk, log) =>
-                    {
-                        bulk.Index(log.Index);
-                        return bulk;
-                    });
-
-                    return selector;
+                    descriptor.Index = doc.Index;
+                    return descriptor;
                 },
                 token);
 
-                if (result?.ServerError?.Error != null)
+                if (result.Errors)
                 {
-                    InternalLogger.Log(LogLevel.Error, result.ServerError.Error.Reason);
-                }
-
-                // TODO: Once the client is updated and can handle a valid response this status
-                // 201 check can be removed.
-                if (!result.IsValid && result.ItemsWithErrors.All(x => x.Status != 201))
-                {
-                    InternalLogger.Log(LogLevel.Error, result.DebugInformation);
-
-                    foreach (var item in result.ItemsWithErrors.Where(x => x.Status != 201))
+                    if (result.Items.Any(x => x.Index.Error != null))
                     {
-                        if (item.Error == null) continue;
-                        InternalLogger.Log(LogLevel.Error, "Error adding log: {0} Index: {1} StatusCode: {2}", item.Error?.Reason, item.Index, item.Status);
+                        foreach (var item in result.Items.Where(x => !x.Index.IsValid))
+                        {
+                            if (item.Index.Error == null) continue;
+
+                            InternalLogger.Log(LogLevel.Error, "Error adding log: {0} Index: {1} StatusCode: {2}", item.Index.Error.Reason, item.Index.Index, item.Index.Status);
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                InternalLogger.Log(ex, LogLevel.Error, "Error performing indexing operation");
+                InternalLogger.Log(ex, LogLevel.Error, "Error performing indexing operation.");
+                if (ex.InnerException != null)
+                    InternalLogger.Log(ex.InnerException, LogLevel.Error, "Inner Exception: ");
             }
         }
 
@@ -241,9 +157,8 @@ namespace NLog.Targets.OpenSearch
         {
             if (properties.TryGetValue("EventId", out var value))
             {
-                if (value is EventId)
+                if (value is EventId eventId)
                 {
-                    var eventId = (EventId)value;
                     properties["EventId"] = eventId.Id;
 
                     if (!String.IsNullOrEmpty(eventId.Name))

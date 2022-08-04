@@ -27,7 +27,14 @@ namespace NLog.Targets.OpenSearch.Example
 
                 try
                 {
-                    throw new Exception("Ruh roh. Something went wrong.", new ArgumentNullException("Something was null."));
+                    var nestedEx3 = new Exception("this is a deep nested exception 3.");
+                    var nestedEx2 = new Exception("this is a deep nested exception 2.", nestedEx3);
+                    var nestedEx = new Exception("this is a deep nested exception.", nestedEx2);
+                    var innerEx = new ArgumentNullException("Something was null.", nestedEx);
+                    var outerEx = new Exception("Ruh roh. Something went wrong.", innerEx);
+
+                    throw outerEx;
+
                 }
                 catch (Exception ex)
                 {
