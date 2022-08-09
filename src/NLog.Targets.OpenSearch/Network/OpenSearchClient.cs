@@ -52,7 +52,7 @@ namespace NLog.Targets.OpenSearch.Network
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
                 DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
             };
-            _jsonSerializerOptions.Converters.Add(new IgnoreTypeConverter());
+            //_jsonSerializerOptions.Converters.Add(new IgnoreTypeConverter());
             _jsonSerializerOptions.Converters.Add(new RouteEndpointConverter());
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());

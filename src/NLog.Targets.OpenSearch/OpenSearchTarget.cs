@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using NLog.Common;
@@ -104,6 +106,7 @@ namespace NLog.Targets.OpenSearch
                             var properties = GetAllProperties(log);
                             FilterProperties(properties);
                             FixProperties(properties);
+                            RemoveUnserializablePropertyTypes(properties);
                             return properties;
                         }
 
@@ -174,7 +177,44 @@ namespace NLog.Targets.OpenSearch
             await BulkIndexAsync(logEvents, cancellationToken);
         }
 
+        private void RemoveUnserializablePropertyTypes(IDictionary<string, object> properties)
+        {
+            foreach (var item in properties)
+            {
+                switch (item.Value)
+                {
 
+                    case bool _:
+                    case byte _:
+                    case DateTime _:
+                    case DateTimeOffset _:
+                    case decimal _:
+                    case double _:
+                    case Enum _:
+                    case Guid _:
+                    case short _:
+                    case int _:
+                    case long _:
+                    case sbyte _:
+                    case float _:
+                    case string _:
+                    case ushort _:
+                    case uint _:
+                    case ulong _:
+                    case LogLevel _:
+                    case RouteEndpoint _:
+                    case TimeSpan _:
+                        break;
+                    case IPAddress ip:
+                        properties[item.Key] = ip.ToString();
+                        break;
+                    default:
+                        InternalLogger.Log(LogLevel.Trace, "Removed unserializable property of type {0}", item.Value.GetType().FullName);
+                        properties.Remove(item);
+                        break;
+                }
+            }
+        }
         //private IEnumerable<object> RenderLogEvents(IEnumerable<AsyncLogEventInfo> logEvents)
         //{
         //    foreach (var item in logEvents)

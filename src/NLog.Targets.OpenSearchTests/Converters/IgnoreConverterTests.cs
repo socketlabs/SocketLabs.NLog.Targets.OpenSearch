@@ -24,7 +24,7 @@ namespace NLog.Targets.OpenSearch.Converters.Tests
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
             };
-            _jsonSerializerOptions.Converters.Add(new TestObjectConverter());
+            //_jsonSerializerOptions.Converters.Add(new TestObjectConverter());
             _jsonSerializerOptions.Converters.Add(new IgnoreTypeConverter());
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -46,7 +46,7 @@ namespace NLog.Targets.OpenSearch.Converters.Tests
         {
             var converter = new IgnoreTypeConverter();
             Assert.ThrowsException<NotSupportedException>(action: () =>
-            {            
+            {
                 var reader = new Utf8JsonReader();
                 converter.Read(ref reader, null, _jsonSerializerOptions);
             });
@@ -59,6 +59,8 @@ namespace NLog.Targets.OpenSearch.Converters.Tests
             var writer = new Utf8JsonWriter(new MemoryStream(), new JsonWriterOptions());
             converter.Write(writer, _testObj.Type, _jsonSerializerOptions);
         }
+
+
 
         [TestMethod]
         public void SerializationTest()
