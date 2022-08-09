@@ -4,21 +4,30 @@ using System.Text.Json.Serialization;
 
 namespace NLog.Targets.OpenSearch.Converters
 {
-    internal class ExceptionConverter : JsonConverter<Exception>
+    internal class ExceptionConverter : JsonConverter<object>
     {
-        public override Exception Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override bool CanConvert(Type typeToConvert)
+        {
+            return typeToConvert == typeof(Exception);
+        }
+
+        public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override void Write(Utf8JsonWriter writer, Exception value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
             int depth = 0;
             WriteException(writer, value, options, false, ref depth);
         }
 
-        private void WriteException(Utf8JsonWriter writer, Exception value, JsonSerializerOptions options, bool isInnerExecption, ref int depth)
+        private void WriteException(Utf8JsonWriter writer, object value, JsonSerializerOptions options, bool isInnerExecption, ref int depth)
         {
+            var ex = value as Exception;
+
+            if (ex == null) return;
+
             if (isInnerExecption)
             {
                 writer.WriteStartObject("innerException");
@@ -28,19 +37,19 @@ namespace NLog.Targets.OpenSearch.Converters
                 writer.WriteStartObject();
             }
 
-            writer.WriteNumber("hResult", value.HResult);
-            writer.WriteString("message", value.Message);
+            writer.WriteNumber("hResult", ex.HResult);
+            writer.WriteString("message", ex.Message);
 
-            if (value.HelpLink != null)
-                writer.WriteString("helpLink", value.HelpLink);
+            if (ex.HelpLink != null)
+                writer.WriteString("helpLink", ex.HelpLink);
 
-            if (value.Source != null)
-                writer.WriteString("source", value.Source);
+            if (ex.Source != null)
+                writer.WriteString("source", ex.Source);
 
-            if (value.StackTrace != null)
-                writer.WriteString("stackTrace", value.StackTrace);
+            if (ex.StackTrace != null)
+                writer.WriteString("stackTrace", ex.StackTrace);
 
-            if (value.InnerException != null)
+            if (ex.InnerException != null)
             {
                 depth++;
 
@@ -50,7 +59,7 @@ namespace NLog.Targets.OpenSearch.Converters
                     return;
                 }
 
-                WriteException(writer, value.InnerException, options, true, ref depth);
+                WriteException(writer, ex.InnerException, options, true, ref depth);
             }
 
             writer.WriteEndObject();
