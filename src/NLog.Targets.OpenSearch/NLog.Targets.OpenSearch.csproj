@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net461;net5.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net452;net461;net48;net481;net5.0;net6.0</TargetFrameworks>
 		<Company>SocketLabs</Company>
 		<Description>NLog Target for OpenSearch</Description>
 		<Copyright>2022 SocketLabs Acquisition LLC</Copyright>
