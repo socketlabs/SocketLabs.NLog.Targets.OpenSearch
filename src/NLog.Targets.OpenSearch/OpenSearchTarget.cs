@@ -101,16 +101,12 @@ namespace NLog.Targets.OpenSearch
                     },
                     propertyRender: () =>
                     {
-                        if (IncludeEventProperties)
-                        {
-                            var properties = GetAllProperties(log);
-                            FilterProperties(properties);
-                            FixProperties(properties);
-                            RemoveUnserializablePropertyTypes(properties);
-                            return properties;
-                        }
+                        var properties = GetAllProperties(log);
 
-                        return null;
+                        FilterProperties(properties);
+                        FixProperties(properties);
+                        RemoveUnserializablePropertyTypes(properties);
+                        return properties;
                     })
                 );
 
@@ -215,13 +211,23 @@ namespace NLog.Targets.OpenSearch
                 }
             }
         }
-        //private IEnumerable<object> RenderLogEvents(IEnumerable<AsyncLogEventInfo> logEvents)
-        //{
-        //    foreach (var item in logEvents)
-        //    {
-        //        RenderLogEvent()
-        //    }
-        //}
 
+        protected override IDictionary<string, object> CaptureScopeContextProperties(LogEventInfo logEvent, IDictionary<string, object> contextProperties)
+        {
+            var properties = base.CaptureScopeContextProperties(logEvent, contextProperties);
+
+            if (IncludeScopeProperties && properties != null)
+            {
+                foreach (var item in properties)
+                {
+                    if (!logEvent.Properties.TryGetValue(item.Key, out _))
+                    {
+                        logEvent.Properties.Add(item.Key, item.Value);
+                    }
+                }
+            }
+
+            return properties;
+        }
     }
 }
