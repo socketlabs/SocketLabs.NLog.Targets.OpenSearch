@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using NLog.Common;
@@ -12,6 +11,10 @@ using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets.OpenSearch.Extensions;
 using NLog.Targets.OpenSearch.Network;
+
+#if NETCOREAPP
+using Microsoft.AspNetCore.Routing;
+#endif
 
 namespace NLog.Targets.OpenSearch
 {
@@ -101,16 +104,12 @@ namespace NLog.Targets.OpenSearch
                     },
                     propertyRender: () =>
                     {
-                        if (IncludeEventProperties)
-                        {
-                            var properties = GetAllProperties(log);
-                            FilterProperties(properties);
-                            FixProperties(properties);
-                            RemoveUnserializablePropertyTypes(properties);
-                            return properties;
-                        }
+                        var properties = GetAllProperties(log);
 
-                        return null;
+                        FilterProperties(properties);
+                        FixProperties(properties);
+                        RemoveUnserializablePropertyTypes(properties);
+                        return properties;
                     })
                 );
 
@@ -202,7 +201,9 @@ namespace NLog.Targets.OpenSearch
                     case uint _:
                     case ulong _:
                     case LogLevel _:
+#if NETCOREAPP
                     case RouteEndpoint _:
+#endif
                     case TimeSpan _:
                         break;
                     case IPAddress ip:
@@ -215,13 +216,23 @@ namespace NLog.Targets.OpenSearch
                 }
             }
         }
-        //private IEnumerable<object> RenderLogEvents(IEnumerable<AsyncLogEventInfo> logEvents)
-        //{
-        //    foreach (var item in logEvents)
-        //    {
-        //        RenderLogEvent()
-        //    }
-        //}
 
+        protected override IDictionary<string, object> CaptureScopeContextProperties(LogEventInfo logEvent, IDictionary<string, object> contextProperties)
+        {
+            var properties = base.CaptureScopeContextProperties(logEvent, contextProperties);
+
+            if (IncludeScopeProperties && properties != null)
+            {
+                foreach (var item in properties)
+                {
+                    if (!logEvent.Properties.TryGetValue(item.Key, out _))
+                    {
+                        logEvent.Properties.Add(item.Key, item.Value);
+                    }
+                }
+            }
+
+            return properties;
+        }
     }
 }

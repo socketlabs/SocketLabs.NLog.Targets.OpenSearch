@@ -4,19 +4,20 @@
 		<TargetFrameworks>netstandard2.0;net461;net5.0;net6.0;net7.0</TargetFrameworks>
 		<Company>SocketLabs</Company>
 		<Description>NLog Target for OpenSearch</Description>
-		<Copyright>2022 SocketLabs Acquisition LLC</Copyright>
+		<Copyright>2023 SocketLabs Acquisition LLC</Copyright>
 		<Authors>Matt Soler</Authors>
 		<PackageProjectUrl>https://github.com/socketlabs/NLog.Targets.OpenSearch</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/socketlabs/NLog.Targets.OpenSearch</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>opensearch,nlog</PackageTags>
-		<AssemblyVersion>1.3.0.0</AssemblyVersion>
-		<FileVersion>1.3.0.0</FileVersion>
+		<AssemblyVersion>1.4.0.0</AssemblyVersion>
+		<FileVersion>1.4.0.0</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Converters\TestObjectConverter.cs" />
+		<Compile Remove="Converters\TestObjectConverter.cs" />
+		<Compile Remove="Converters\RouteEndpointConverter.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -31,22 +32,25 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' != 'net461' OR '$(TargetFramework)' != 'net5.0'">
-		<PackageReference Include="System.Text.Json" Version="7.0.0" />
+		<PackageReference Include="System.Text.Json" Version="7.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0' OR '$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
+		<Compile Include="Converters\RouteEndpointConverter.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="IdentityModel" Version="6.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
-		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.1" />
-		<PackageReference Include="NLog" Version="5.1.0" />
+		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.1" />
+		<PackageReference Include="NLog" Version="5.1.2" />
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>NLog.Targets.OpenSearchTests</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
-	
+
 </Project>

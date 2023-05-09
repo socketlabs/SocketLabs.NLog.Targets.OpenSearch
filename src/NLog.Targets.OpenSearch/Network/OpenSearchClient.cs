@@ -53,7 +53,9 @@ namespace NLog.Targets.OpenSearch.Network
                 DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
             };
             //_jsonSerializerOptions.Converters.Add(new IgnoreTypeConverter());
+#if NETCOREAPP
             _jsonSerializerOptions.Converters.Add(new RouteEndpointConverter());
+#endif
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
