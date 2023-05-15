@@ -18,7 +18,7 @@ namespace NLog.Targets.OpenSearch.Network
 {
     internal class OpenSearchClient : IOpenSearchClient
     {
-        private static byte[] _newline = new byte[] { (byte)'\n' };
+        private static readonly byte[] _newline = new byte[] { (byte)'\n' };
         private readonly HttpClient _client;
         private readonly RecyclableMemoryStreamManager _memoryStreamManager;
         private readonly string[] _opensearchHosts;

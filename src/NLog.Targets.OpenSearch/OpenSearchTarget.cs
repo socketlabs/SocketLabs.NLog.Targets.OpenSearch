@@ -22,7 +22,7 @@ namespace NLog.Targets.OpenSearch
     public class OpenSearchTarget : AsyncTaskTarget
     {
         private string[] _uris;
-        private char[] _split = new char[] { ',' };
+        private readonly char[] _split = new char[] { ',' };
         private OpenSearchClient _client;
 
         public string Username { get; set; }
