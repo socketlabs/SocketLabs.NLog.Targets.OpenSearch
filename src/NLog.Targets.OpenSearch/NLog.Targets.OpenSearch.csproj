@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net461;net5.0;net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net461;net6.0;net7.0</TargetFrameworks>
 		<Company>SocketLabs</Company>
 		<Description>NLog Target for OpenSearch</Description>
 		<Copyright>2023 SocketLabs Acquisition LLC</Copyright>
@@ -27,22 +27,21 @@
 		</None>
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net461' OR '$(TargetFramework)' == 'net5.0'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
 		<PackageReference Include="System.Text.Json" Version="6.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' != 'net461' OR '$(TargetFramework)' != 'net5.0'">
+	<ItemGroup Condition="'$(TargetFramework)' != 'net461'">
 		<PackageReference Include="System.Text.Json" Version="7.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0' OR '$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
 		<Compile Include="Converters\RouteEndpointConverter.cs" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="IdentityModel" Version="6.0.0" />
-		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.1" />
-		<PackageReference Include="NLog" Version="5.1.2" />
+		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.2" />
+		<PackageReference Include="NLog" Version="5.1.4" />
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 	</ItemGroup>

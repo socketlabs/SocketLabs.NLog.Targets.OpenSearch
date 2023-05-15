@@ -18,7 +18,7 @@ namespace NLog.Targets.OpenSearch.Network
 {
     internal class OpenSearchClient : IOpenSearchClient
     {
-        private static byte[] _newline = new byte[] { (byte)'\n' };
+        private static readonly byte[] _newline = new byte[] { (byte)'\n' };
         private readonly HttpClient _client;
         private readonly RecyclableMemoryStreamManager _memoryStreamManager;
         private readonly string[] _opensearchHosts;
@@ -39,7 +39,7 @@ namespace NLog.Targets.OpenSearch.Network
             _client = new HttpClient(ConfigureClientHandler(certificateThumbprint));
 
             if (!string.IsNullOrEmpty(openSearchUser) && !string.IsNullOrEmpty(openSearchPass))
-                _client.DefaultRequestHeaders.Authorization = new BasicAuthenticationHeaderValue(openSearchUser, openSearchPass);
+                _client.DefaultRequestHeaders.Authorization = BasicAuthenticationHeaderValue.Create(openSearchUser, openSearchPass);
 
             _memoryStreamManager = memoryStreamManager;
             _opensearchHosts = opensearchHosts;
@@ -71,7 +71,7 @@ namespace NLog.Targets.OpenSearch.Network
 
                 if (_useCompression)
                 {
-                    var gzip = new GZipStream(ms, CompressionMode.Compress, true);
+                    var gzip = new GZipStream(ms, CompressionLevel.Fastest, true);
                     stream = gzip;
                 }
                 else
