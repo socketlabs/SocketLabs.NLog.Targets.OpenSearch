@@ -71,7 +71,7 @@ namespace NLog.Targets.OpenSearch.Network
 
                 if (_useCompression)
                 {
-                    var gzip = new GZipStream(ms, CompressionMode.Compress, true);
+                    var gzip = new GZipStream(ms, CompressionLevel.Fastest, true);
                     stream = gzip;
                 }
                 else
