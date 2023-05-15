@@ -39,7 +39,7 @@ namespace NLog.Targets.OpenSearch.Network
             _client = new HttpClient(ConfigureClientHandler(certificateThumbprint));
 
             if (!string.IsNullOrEmpty(openSearchUser) && !string.IsNullOrEmpty(openSearchPass))
-                _client.DefaultRequestHeaders.Authorization = new BasicAuthenticationHeaderValue(openSearchUser, openSearchPass);
+                _client.DefaultRequestHeaders.Authorization = BasicAuthenticationHeaderValue.Create(openSearchUser, openSearchPass);
 
             _memoryStreamManager = memoryStreamManager;
             _opensearchHosts = opensearchHosts;
