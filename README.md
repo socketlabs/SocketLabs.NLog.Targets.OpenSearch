@@ -1,9 +1,11 @@
-<img src="https://static.socketlabs.com/logos/logo-dark-sans-tag-507x64.png" alt="SocketLabs Logo" width="253" height="32" />  
+<img src="https://static.socketlabs.com/logos/logo-dark-sans-tag-507x64.png" alt="SocketLabs Logo" width="190" height="24" />  
 
 [![Build Status][build-status]](https://socketlabs.visualstudio.com/NLog.Targets.OpenSearch/_build/latest?definitionId=4&branchName=main)  
 
 # NLog.Targets.OpenSearch
 > NLog Target for OpenSearch
+
+This NLog target is designed to specifically work with OpenSearch Versions >=1.0.  It is focused on performance, and doesn't require any third party clients.
 
 ## Getting Started
 
@@ -27,32 +29,51 @@ Install-Package NLog.Targets.OpenSearch
 			xsi:schemaLocation="http://www.nlog-project.org/schemas/NLog.xsd NLog.xsd"
 			autoReload="true"
 			throwExceptions="false"
-			internalLogLevel="Warn" internalLogFile="logs\nlog-internal.log">
+			internalLogLevel="Warn" internalLogFile="logs/nlog-internal.log">
 
 	<extensions>
 		<add assembly="NLog.Targets.OpenSearch"/>
 	</extensions>
-	
-	<targets>
-		<target name="opensearch" xsi:type="BufferingWrapper" flushTimeout="30">
-			<target xsi:type="OpenSearch"
-					uris="https://localhost:9200/"
-					username="logstash"
-					password="logstash"
-					index="nlog-selfservice-${date:format=yyyy.MM.dd}"
-					retryCount ="10"
-					batchSize="10"
-					includeEventProperties="true"
-					includeCallSite="true"
-					IncludeCallSiteStackTrace="true"
-					enableHttpCompression="true">
 
-				<contextproperty name="MachineName" layout="${lowercase:machinename}" />
-				<contextproperty name="ThreadId" layout="${threadid}" />
-			</target>
+	<targets>
+		<target xsi:type="OpenSearch"
+                name="opensearch"
+                uris="http://localhost:9200"
+                username="logstash"
+                password="Pa$$w0rd!"
+				includeEventProperties="true"
+                includeCallSite="true"
+                includeCallSiteStackTrace="true"
+				includeScopeProperties="true"
+                enableHttpCompression="false"
+                validateCertificates="false">
+
+			<contextproperty name="appDomain" layout="${appdomain:format={1\}}" />
+			<contextproperty name="assemblyVersion" layout="${assembly-version}" />
+			<contextproperty name="dotnet.version" layout="${environment:DOTNET_VERSION}" />
+			<contextproperty name="gc.collectionCount0" layout="${gc:property=CollectionCount0}" />
+			<contextproperty name="gc.collectionCount1" layout="${gc:property=CollectionCount1}" />
+			<contextproperty name="gc.collectionCount2" layout="${gc:property=CollectionCount2}" />
+			<contextproperty name="gc.maxGeneration" layout="${gc:property=MaxGeneration}" />
+			<contextproperty name="gc.totalMemory" layout="${gc:property=TotalMemory}" />
+			<contextproperty name="gc.totalMemoryForceCollection" layout="${gc:property=TotalMemoryForceCollection}" />
+			<contextproperty name="hostname" layout="${hostname}" />
+			<contextproperty name="process.handleCount" layout="${processinfo:property=HandleCount}" />
+			<contextproperty name="process.maxWorkingSet" layout="${processinfo:property=MaxWorkingSet}" />
+			<contextproperty name="process.minWorkingSet" layout="${processinfo:property=MinWorkingSet}" />
+			<contextproperty name="process.name" layout="${processname}" />
+			<contextproperty name="process.peakWorkingSet64" layout="${processinfo:property=PeakWorkingSet64}" />
+			<contextproperty name="process.pid" layout="${processinfo:property=Id}" />
+			<contextproperty name="process.privateMemorySize64" layout="${processinfo:property=PrivateMemorySize64}" />
+			<contextproperty name="process.startTime" layout="${processinfo:property=StartTime}" />
+			<contextproperty name="process.virtualMemorySize64" layout="${processinfo:property=VirtualMemorySize64}" />
+			<contextproperty name="process.workingSet64" layout="${processinfo:property=WorkingSet64}" />
+			<contextproperty name="threadId" layout="${threadid}" />
+			<contextproperty name="system.environment" layout="${systemEnvironment}" />
+			<contextproperty name="kubernetes.namespace" layout="${environment:KUBERNETES_NAMESPACE}" />
 		</target>
 	</targets>
-	
+
 	<rules>
 		<logger name="*" minlevel="Info" writeTo="opensearch" />
 	</rules>
@@ -72,7 +93,7 @@ Install-Package NLog.Targets.OpenSearch
 * 1.0.0 Initial Release
 
 ### License
-This code base is confidential and not for public distribution at this time.
+This code base is licensed under the [MIT License](LICENSE.md).
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

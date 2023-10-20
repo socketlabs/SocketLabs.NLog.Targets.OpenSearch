@@ -2,28 +2,38 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net461;net6.0;net7.0</TargetFrameworks>
-		<Company>SocketLabs</Company>
-		<Description>NLog Target for OpenSearch</Description>
-		<Copyright>2023 SocketLabs Acquisition LLC</Copyright>
-		<Authors>Matt Soler</Authors>
-		<PackageProjectUrl>https://github.com/socketlabs/NLog.Targets.OpenSearch</PackageProjectUrl>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/socketlabs/NLog.Targets.OpenSearch</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageTags>opensearch,nlog</PackageTags>
-		<AssemblyVersion>2.0.0.0</AssemblyVersion>
-		<FileVersion>2.0.0.0</FileVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Company>SocketLabs</Company>
+		<Description>NLog Target for OpenSearch</Description>
+		<Copyright>© 2023 SocketLabs Acquisition, LLC. All rights reserved.</Copyright>
+		<Authors>Matt Soler</Authors>
+		<PackageTags>opensearch,nlog,target,logging</PackageTags>
+		<PackageProjectUrl>https://github.com/socketlabs/NLog.Targets.OpenSearch</PackageProjectUrl>
+		<PackageLicenseUrl>https://github.com/socketlabs/NLog.Targets.OpenSearch/main/LICENSE.md</PackageLicenseUrl>
+		<RepositoryUrl>https://github.com/socketlabs/NLog.Targets.OpenSearch</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<FileVersion>2.0.0.0</FileVersion>
 		<LangVersion>Latest</LangVersion>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Converters\TestObjectConverter.cs" />
 		<Compile Remove="Converters\RouteEndpointConverter.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="..\..\icon.png">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\LICENSE.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
 		<None Include="..\..\README.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>

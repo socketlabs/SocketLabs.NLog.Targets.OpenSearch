@@ -9,10 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Targets.OpenSearch.Exa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2568C423-E6E6-4482-BAAA-E75083F94807}"
 	ProjectSection(SolutionItems) = preProject
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.Targets.OpenSearchTests", "src\NLog.Targets.OpenSearchTests\NLog.Targets.OpenSearchTests.csproj", "{067B0A9A-5625-41EE-A1C5-79DA5588824D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Targets.OpenSearchTests", "src\NLog.Targets.OpenSearchTests\NLog.Targets.OpenSearchTests.csproj", "{067B0A9A-5625-41EE-A1C5-79DA5588824D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
