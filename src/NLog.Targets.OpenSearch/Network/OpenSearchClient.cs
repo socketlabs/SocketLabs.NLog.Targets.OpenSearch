@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Net.Http;
+﻿using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.IO;
 using NLog.Targets.OpenSearch.Converters;
 using NLog.Targets.OpenSearch.Extensions;
@@ -18,33 +12,25 @@ namespace NLog.Targets.OpenSearch.Network
 {
     internal class OpenSearchClient : IOpenSearchClient
     {
-        private static readonly byte[] _newline = new byte[] { (byte)'\n' };
+        private static readonly byte[] _newline = "\n"u8.ToArray();
         private readonly HttpClient _client;
         private readonly RecyclableMemoryStreamManager _memoryStreamManager;
         private readonly string[] _opensearchHosts;
         private readonly bool _useCompression;
-        private readonly Action<Exception, LogLevel, string> _onLog;
+        private readonly Action<Exception, LogLevel, string>? _onLog;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        public OpenSearchClient(
-            RecyclableMemoryStreamManager memoryStreamManager,
-            string[] opensearchHosts,
-            bool useCompression,
-            string certificateThumbprint = null,
-            string openSearchUser = null,
-            string openSearchPass = null,
-            Action<Exception, LogLevel, string> onLog = null
-            )
+        public OpenSearchClient(OpenSearchClientOptions options)
         {
-            _client = new HttpClient(ConfigureClientHandler(certificateThumbprint));
+            _memoryStreamManager = new RecyclableMemoryStreamManager();
+            _client = new HttpClient(ConfigureClientHandler(options.CertificateThumprint, options.ValidateCertificates));
 
-            if (!string.IsNullOrEmpty(openSearchUser) && !string.IsNullOrEmpty(openSearchPass))
-                _client.DefaultRequestHeaders.Authorization = BasicAuthenticationHeaderValue.Create(openSearchUser, openSearchPass);
+            if (!string.IsNullOrEmpty(options.Username) && !string.IsNullOrEmpty(options.Password))
+                _client.DefaultRequestHeaders.Authorization = BasicAuthenticationHeaderValue.Create(options.Username!, options.Password!);
 
-            _memoryStreamManager = memoryStreamManager;
-            _opensearchHosts = opensearchHosts;
-            _useCompression = useCompression;
-            _onLog = onLog;
+            _opensearchHosts = options._uris;
+            _useCompression = options.EnableHttpCompression;
+            _onLog = options.OnLogging;
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -52,7 +38,6 @@ namespace NLog.Targets.OpenSearch.Network
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
                 DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
             };
-            //_jsonSerializerOptions.Converters.Add(new IgnoreTypeConverter());
 #if NETCOREAPP
             _jsonSerializerOptions.Converters.Add(new RouteEndpointConverter());
 #endif
@@ -61,13 +46,12 @@ namespace NLog.Targets.OpenSearch.Network
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
         }
 
-        public async Task<BulkIndexResponse> BulkIndexAsync<T>(IEnumerable<T> items, Func<T, BulkItemDescriptor, BulkItemDescriptor> bulkItem, CancellationToken token) where T : class
+        public async Task<BulkIndexResponse?> BulkIndexAsync<T>(IEnumerable<T> items, Func<T, BulkItemDescriptor, BulkItemDescriptor> bulkItem, CancellationToken token) where T : ILogEntry
         {
-            Stream stream = null;
+            Stream stream = default!;
             try
-
             {
-                var ms = _memoryStreamManager.GetStream() as RecyclableMemoryStream;
+                var ms = (RecyclableMemoryStream)_memoryStreamManager.GetStream();
 
                 if (_useCompression)
                 {
@@ -87,13 +71,21 @@ namespace NLog.Targets.OpenSearch.Network
                     try
                     {
                         await JsonSerializer.SerializeAsync(stream, op, _jsonSerializerOptions, token);
-                        await stream.WriteAsync(_newline, 0, _newline.Length);
-                        await JsonSerializer.SerializeAsync(stream, item, _jsonSerializerOptions, token);
-                        await stream.WriteAsync(_newline, 0, _newline.Length);
+#if NETCOREAPP
+                        await stream.WriteAsync(_newline, token);
+#else
+                        await stream.WriteAsync(_newline, 0, _newline.Length, token);
+#endif
+                        await JsonSerializer.SerializeAsync(stream, item.Properties, _jsonSerializerOptions, token);
+#if NETCOREAPP
+                        await stream.WriteAsync(_newline, token);
+#else
+                        await stream.WriteAsync(_newline, 0, _newline.Length, token);
+#endif
                     }
                     catch (Exception ex)
                     {
-                        _onLog.Invoke(ex, LogLevel.Error, "Error serializing object.");
+                        _onLog?.Invoke(ex, LogLevel.Error, "Error serializing object.");
                     }
                 }
 
@@ -104,7 +96,7 @@ namespace NLog.Targets.OpenSearch.Network
                     gz.Close();
                 }
 
-                List<Exception> errors = null;
+                List<Exception>? errors = null;
 
                 ms.TryGetBuffer(out var buffer);
                 foreach (var host in _opensearchHosts.Randomize())
@@ -114,7 +106,7 @@ namespace NLog.Targets.OpenSearch.Network
                         token.ThrowIfCancellationRequested();
                         ms.Position = 0;
                         var request = new HttpRequestMessage(HttpMethod.Post, $"{host}/_bulk");
-#if NET5_0_OR_GREATER
+#if NETCOREAPP
                         request.Content = new System.Net.Http.ReadOnlyMemoryContent(buffer.AsMemory());
 #else
                         request.Content = new ReadOnlyMemoryContent(buffer.AsMemory());
@@ -124,27 +116,34 @@ namespace NLog.Targets.OpenSearch.Network
 
                         request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                        var response = await _client.SendAsync(request);
+                        var response = await _client.SendAsync(request, token);
 
                         if (!response.IsSuccessStatusCode)
                         {
+#if NETCOREAPP
+                            var content = await response.Content.ReadAsStringAsync(token);
+#else
                             var content = await response.Content.ReadAsStringAsync();
+#endif
                             throw new HttpRequestException($"Error sending bulk index request {response.ReasonPhrase}: {content}");
                         }
-
+#if NETCOREAPP
+                        var utf8Json = await response.Content.ReadAsStreamAsync(token);
+#else
                         var utf8Json = await response.Content.ReadAsStreamAsync();
+#endif
                         var bir = JsonSerializer.Deserialize<BulkIndexResponse>(utf8Json, _jsonSerializerOptions);
                         return bir;
                     }
                     catch (Exception ex)
                     {
-                        if (errors == null) errors = new List<Exception>();
+                        errors ??= new List<Exception>();
 
                         errors.Add(ex);
                     }
                 }
 
-                throw new AggregateException("Unable to send bulk index request to any of the OpenSearch hosts. See InnerException for details.", errors);
+                throw new AggregateException("Unable to send bulk index request to any of the OpenSearch hosts. See InnerException for details.", errors!);
 
             }
             finally
@@ -153,21 +152,26 @@ namespace NLog.Targets.OpenSearch.Network
             }
         }
 
-        private HttpMessageHandler ConfigureClientHandler(string certificateThumbprint)
+        private static HttpMessageHandler ConfigureClientHandler(string? certificateThumbprint, bool validateCertificates)
         {
-            return new HttpClientHandler()
-            {
-                ServerCertificateCustomValidationCallback =
-                (httpRequestMessage, cert, certChain, policyErrors) =>
+            if (validateCertificates && string.IsNullOrEmpty(certificateThumbprint))
+                return new HttpClientHandler();
+            else
+                return new HttpClientHandler()
                 {
-                    if (!string.IsNullOrEmpty(certificateThumbprint))
+                    ServerCertificateCustomValidationCallback =
+                    (httpRequestMessage, cert, certChain, policyErrors) =>
                     {
-                        return cert.Thumbprint.Equals(certificateThumbprint, StringComparison.OrdinalIgnoreCase);
+                        if (validateCertificates && !string.IsNullOrEmpty(certificateThumbprint))
+                        {
+                            if (cert is null) return false;
+
+                            return cert.Thumbprint.Equals(certificateThumbprint, StringComparison.OrdinalIgnoreCase);
+                        }
+                        else
+                            return true;
                     }
-                    else
-                        return true;
-                }
-            };
+                };
         }
     }
 }

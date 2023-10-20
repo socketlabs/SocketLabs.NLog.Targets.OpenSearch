@@ -8,19 +8,19 @@ namespace NLog.Targets.OpenSearch.Models
         // Summary:
         //     The error associated with the bulk operation
         [JsonPropertyName("error")]
-        public Error Error { get; set; }
+        public Error? Error { get; set; }
 
         //
         // Summary:
         //     The id of the document for the bulk operation
         [JsonPropertyName("_id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         //
         // Summary:
         //     The index against which the bulk operation ran
         [JsonPropertyName("_index")]
-        public string Index { get; set; }
+        public string? Index { get; set; }
 
         [JsonPropertyName("_primary_term")]
         public long PrimaryTerm { get; set; }
@@ -29,7 +29,7 @@ namespace NLog.Targets.OpenSearch.Models
         // Summary:
         //     The result of the bulk operation
         [JsonPropertyName("result")]
-        public string Result { get; set; }
+        public string? Result { get; set; }
 
         [JsonPropertyName("_seq_no")]
         public long SequenceNumber { get; set; }
@@ -38,7 +38,7 @@ namespace NLog.Targets.OpenSearch.Models
         // Summary:
         //     The shards associated with the bulk operation
         [JsonPropertyName("_shards")]
-        public ShardStatistics Shards { get; set; }
+        public ShardStatistics? Shards { get; set; }
 
         //
         // Summary:

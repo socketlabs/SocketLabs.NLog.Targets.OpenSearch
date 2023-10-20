@@ -14,10 +14,10 @@ namespace NLog.Targets.OpenSearch.Models
         }
 
         [JsonPropertyName("_index")]
-        public string Index { get; set; }
+        public string? Index { get; set; }
 
         [JsonPropertyName("_id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
     }
 }

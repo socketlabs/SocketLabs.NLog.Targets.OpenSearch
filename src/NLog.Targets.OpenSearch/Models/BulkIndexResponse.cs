@@ -6,6 +6,6 @@ namespace NLog.Targets.OpenSearch.Models
     {
         public long Took { get; set; }
         public bool Errors { get; set; }
-        public IEnumerable<BulkIndexResponseOperation> Items { get; set; }
+        public IEnumerable<BulkIndexResponseOperation> Items { get; set; } = Array.Empty<BulkIndexResponseOperation>();
     }
 }

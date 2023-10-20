@@ -24,9 +24,7 @@ namespace NLog.Targets.OpenSearch.Converters
 
         private void WriteException(Utf8JsonWriter writer, object value, JsonSerializerOptions options, bool isInnerExecption, ref int depth)
         {
-            var ex = value as Exception;
-
-            if (ex == null) return;
+            if (value is not Exception ex) return;
 
             if (isInnerExecption)
             {

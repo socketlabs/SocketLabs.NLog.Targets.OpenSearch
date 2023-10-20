@@ -9,21 +9,21 @@ namespace NLog.Targets.OpenSearch.Utilities
 {
     internal class ReadOnlyMemoryContent : HttpContent
     {
-        private Memory<byte> _memory;
+        private readonly Memory<byte> _memory;
 
         public ReadOnlyMemoryContent(Memory<byte> memory)
         {
             _memory = memory;
         }
 
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
         {
             var buffer = _memory.ToArray();
             return stream.WriteAsync(buffer, 0, buffer.Length);
         }
 
 #if (NET5_0_OR_GREATER)
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context, CancellationToken cancellationToken)
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context, CancellationToken cancellationToken)
         {
             var buffer = _memory.ToArray();
             return stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);

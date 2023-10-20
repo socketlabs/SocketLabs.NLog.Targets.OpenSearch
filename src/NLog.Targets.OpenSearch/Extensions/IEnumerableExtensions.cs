@@ -8,7 +8,7 @@ namespace NLog.Targets.OpenSearch.Extensions
 {
     internal static class IEnumerableExtensions
     {
-        private static readonly Random _rng = new Random();
+        private static readonly Random _rng = new();
 
         public static T GetRandomElement<T>(this IEnumerable<T> collection)
         {
@@ -27,13 +27,7 @@ namespace NLog.Targets.OpenSearch.Extensions
 
         public static IEnumerable<T> Randomize<T>(this IEnumerable<T> collection)
         {
-            IList<T> buffer = null;
-
-            if (collection is IList<T>)
-            {
-                buffer = collection as IList<T>;
-            }
-            else
+            if (collection is not IList<T> buffer)
             {
                 buffer = collection.ToList();
             }

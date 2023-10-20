@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace NLog.Targets.OpenSearch.Converters
 {
-    internal class LogLevelConverter : JsonConverter<LogLevel>
+    internal class LogLevelConverter : JsonConverter<LogLevel?>
     {
-        public override LogLevel Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override LogLevel? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var level = reader.GetString();
 
@@ -20,9 +20,9 @@ namespace NLog.Targets.OpenSearch.Converters
             return null;
         }
 
-        public override void Write(Utf8JsonWriter writer, LogLevel value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, LogLevel? value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.ToString());
+            writer.WriteStringValue(value?.ToString());
         }
     }
 }

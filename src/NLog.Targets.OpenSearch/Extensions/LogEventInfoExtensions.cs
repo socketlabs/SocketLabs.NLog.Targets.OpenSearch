@@ -2,29 +2,37 @@
 using NLog.Targets.OpenSearch.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection.Emit;
 using System.Text;
 
 namespace NLog.Targets.OpenSearch.Extensions
 {
     internal static class LogEventInfoExtensions
     {
-        public static LogEntry ToLogEntry(this LogEventInfo logEventInfo, Func<string> indexRender, Func<IDictionary<string, object>> propertyRender)
+        public static LogEntry ToLogEntry(this LogEventInfo logEventInfo, Func<string> indexRender, Func<IDictionary<string, object?>> propertyRender)
         {
-            var entry = new LogEntry()
-            {
-                ClassName = logEventInfo.CallerClassName,
-                LineNumber = logEventInfo.CallerLineNumber,
-                MemberName = logEventInfo.CallerMemberName,
-                FilePath = logEventInfo.CallerFilePath,
-                Exception = logEventInfo.Exception,
-                Message = logEventInfo.FormattedMessage,
-                Level = logEventInfo.Level,
-                LoggerName = logEventInfo.LoggerName,
-                StackTrace = logEventInfo.StackTrace,
-                TimeStamp = logEventInfo.TimeStamp,
-                Index = indexRender?.Invoke(),
-                Properties = propertyRender?.Invoke()
-            };
+            var index = indexRender?.Invoke();
+
+            if (string.IsNullOrEmpty(index))
+                throw new ArgumentNullException(nameof(index), "No index specified for OpenSearch");
+
+            var entry = new LogEntry(index!);
+            var properties =  propertyRender?.Invoke();
+            properties ??= new Dictionary<string, object?>();
+
+            properties.TryAdd("className", logEventInfo.CallerClassName);
+            properties.TryAdd("lineNumber", logEventInfo.CallerLineNumber);
+            properties.TryAdd("memberName", logEventInfo.CallerMemberName);
+            properties.TryAdd("filePath", logEventInfo.CallerFilePath);
+            properties.TryAdd("exception", logEventInfo.Exception);
+            properties.TryAdd("message", logEventInfo.FormattedMessage);
+            properties.TryAdd("level", logEventInfo.Level);
+            properties.TryAdd("loggerName", logEventInfo.LoggerName);
+            properties.TryAdd("stackTrace", logEventInfo.StackTrace);
+            properties.TryAdd("timeStamp", logEventInfo.TimeStamp);
+
+            entry.Properties = properties;
 
             return entry;
         }

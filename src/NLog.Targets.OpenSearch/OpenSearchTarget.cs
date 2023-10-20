@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.IO;
+﻿using Microsoft.Extensions.Logging;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
@@ -21,17 +14,29 @@ namespace NLog.Targets.OpenSearch
     [Target("OpenSearch")]
     public class OpenSearchTarget : AsyncTaskTarget
     {
-        private string[] _uris;
+        private string[]? _uris;
         private readonly char[] _split = new char[] { ',' };
-        private OpenSearchClient _client;
+        private OpenSearchClient _client = default!;
 
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public OpenSearchTarget()
+        {
+            RetryCount = 10;
+            BatchSize = 1000;
+            TaskDelayMilliseconds = 5000;
+            OverflowAction = Wrappers.AsyncTargetWrapperOverflowAction.Grow;
+            IncludeEventProperties = true;
+            IncludeCallSite = true;
+            IncludeCallSiteStackTrace = true;
+            IncludeScopeProperties = true;
+        }
+
+        public string? Username { get; set; }
+        public string? Password { get; set; }
 
         /// <summary>
         /// Gets or sets the OpenSearch uris, can be multiple comma separated.
         /// </summary>
-        public string Uris
+        public string? Uris
         {
             get
             {
@@ -47,11 +52,6 @@ namespace NLog.Targets.OpenSearch
         }
 
         /// <summary>
-        /// Set it to true if OpenSearch uses BasicAuth
-        /// </summary>
-        public bool RequireAuth { get; set; }
-
-        /// <summary>
         /// Gets or sets the name of the OpenSearch index to write to.
         /// </summary>
         [RequiredParameter]
@@ -60,18 +60,18 @@ namespace NLog.Targets.OpenSearch
         /// <summary>
         /// Set it to true to enable HttpCompression (Must be enabled on server)
         /// </summary>
-        public bool EnableHttpCompression { get; set; }
+        public bool EnableHttpCompression { get; set; } = false;
 
 
         /// <summary>
         /// Gets or sets whether the OpenSearch client should validate any server certificates.
         /// </summary>
-        public bool ValidateCertificates { get; set; }
+        public bool ValidateCertificates { get; set; } = true;
 
         /// <summary>
         /// Gets or sets whether the OpenSearch client should just validate a certificate thumbprint.
         /// </summary>
-        public string CertificateThumprint { get; set; }
+        public string? CertificateThumprint { get; set; }
 
         protected override void CloseTarget()
         {
@@ -81,11 +81,23 @@ namespace NLog.Targets.OpenSearch
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
-            var rmsm = new RecyclableMemoryStreamManager();
 
-            Action<Exception, LogLevel, string> onLog = (ex, level, message) => InternalLogger.Log(ex, level, message);
+            if (_uris?.Any() != true)
+            {
+                throw new ArgumentNullException(nameof(Uris), "No OpenSearch hosts specified in config.");
+            }
 
-            _client = new OpenSearchClient(rmsm, _uris, EnableHttpCompression, CertificateThumprint, Username, Password, onLog);
+            var options = new OpenSearchClientOptions(_uris)
+            {
+                EnableHttpCompression = EnableHttpCompression,
+                ValidateCertificates = ValidateCertificates,
+                OnLogging = InternalLogger.Log,
+                CertificateThumprint = CertificateThumprint,
+                Password = Password,
+                Username = Username
+            };
+
+            _client = new OpenSearchClient(options);
         }
 
         protected override async Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
@@ -109,6 +121,7 @@ namespace NLog.Targets.OpenSearch
                         FilterProperties(properties);
                         FixProperties(properties);
                         RemoveUnserializablePropertyTypes(properties);
+
                         return properties;
                     })
                 );
@@ -120,13 +133,13 @@ namespace NLog.Targets.OpenSearch
                 },
                 token);
 
-                if (result.Errors)
+                if (result?.Errors == true)
                 {
-                    if (result.Items.Any(x => x.Index.Error != null))
+                    if (result.Items.Any(x => x.Index?.Error != null))
                     {
-                        foreach (var item in result.Items.Where(x => !x.Index.IsValid))
+                        foreach (var item in result.Items.Where(x => !x.Index?.IsValid == true))
                         {
-                            if (item.Index.Error == null) continue;
+                            if (item.Index?.Error == null) continue;
 
                             InternalLogger.Log(LogLevel.Error, "Error adding log: {0} Index: {1} StatusCode: {2}", item.Index.Error.Reason, item.Index.Index, item.Index.Status);
                         }
@@ -141,7 +154,7 @@ namespace NLog.Targets.OpenSearch
             }
         }
 
-        private void FilterProperties(IDictionary<string, object> properties)
+        private static void FilterProperties(IDictionary<string, object> properties)
         {
             properties.Remove("EventId_Id");
             properties.Remove("EventId_Name");
@@ -155,7 +168,7 @@ namespace NLog.Targets.OpenSearch
             }
         }
 
-        private void FixProperties(IDictionary<string, object> properties)
+        private static void FixProperties(IDictionary<string, object> properties)
         {
             if (properties.TryGetValue("EventId", out var value))
             {
@@ -163,9 +176,9 @@ namespace NLog.Targets.OpenSearch
                 {
                     properties["EventId"] = eventId.Id;
 
-                    if (!String.IsNullOrEmpty(eventId.Name))
+                    if (!string.IsNullOrEmpty(eventId.Name))
                     {
-                        properties.Add("EventName", eventId.Name);
+                        properties.TryAdd("EventName", eventId.Name!);
                     }
                 }
             }
@@ -176,63 +189,63 @@ namespace NLog.Targets.OpenSearch
             await BulkIndexAsync(logEvents, cancellationToken);
         }
 
-        private void RemoveUnserializablePropertyTypes(IDictionary<string, object> properties)
+        private static void RemoveUnserializablePropertyTypes(IDictionary<string, object> properties)
         {
-            foreach (var item in properties)
-            {
-                switch (item.Value)
-                {
+            //            foreach (var item in properties)
+            //            {
+            //                switch (item.Value)
+            //                {
 
-                    case bool _:
-                    case byte _:
-                    case DateTime _:
-                    case DateTimeOffset _:
-                    case decimal _:
-                    case double _:
-                    case Enum _:
-                    case Guid _:
-                    case short _:
-                    case int _:
-                    case long _:
-                    case sbyte _:
-                    case float _:
-                    case string _:
-                    case ushort _:
-                    case uint _:
-                    case ulong _:
-                    case LogLevel _:
-#if NETCOREAPP
-                    case RouteEndpoint _:
-#endif
-                    case TimeSpan _:
-                        break;
-                    case IPAddress ip:
-                        properties[item.Key] = ip.ToString();
-                        break;
-                    default:
-                        InternalLogger.Log(LogLevel.Trace, "Removed unserializable property of type {0}", item.Value.GetType().FullName);
-                        properties.Remove(item);
-                        break;
-                }
-            }
+            //                    case bool _:
+            //                    case byte _:
+            //                    case DateTime _:
+            //                    case DateTimeOffset _:
+            //                    case decimal _:
+            //                    case double _:
+            //                    case Enum _:
+            //                    case Guid _:
+            //                    case short _:
+            //                    case int _:
+            //                    case long _:
+            //                    case sbyte _:
+            //                    case float _:
+            //                    case string _:
+            //                    case ushort _:
+            //                    case uint _:
+            //                    case ulong _:
+            //                    case LogLevel _:
+            //#if NETCOREAPP
+            //                    case RouteEndpoint _:
+            //#endif
+            //                    case TimeSpan _:
+            //                        break;
+            //                    case IPAddress ip:
+            //                        properties[item.Key] = ip.ToString();
+            //                        break;
+            //                    default:
+            //                        InternalLogger.Log(LogLevel.Trace, "Removed unserializable property of type {0}", item.Value.GetType().FullName);
+            //                        properties.Remove(item);
+            //                        break;
+            //                }
+            //            }
         }
 
-        protected override IDictionary<string, object> CaptureScopeContextProperties(LogEventInfo logEvent, IDictionary<string, object> contextProperties)
-        {
-            var properties = base.CaptureScopeContextProperties(logEvent, contextProperties);
+        //protected override IDictionary<string, object?>? CaptureScopeContextProperties(LogEventInfo logEvent, IDictionary<string, object?> contextProperties)
+        //{
+        //    var properties = base.CaptureScopeContextProperties(logEvent, contextProperties);
 
-            if (IncludeScopeProperties && properties != null)
-            {
-                foreach (var item in properties)
-                {
-                    if (!logEvent.Properties.TryGetValue(item.Key, out _))
-                    {
-                        logEvent.Properties.Add(item.Key, item.Value);
-                    }
-                }
-            }
+        //    if (IncludeScopeProperties && properties != null)
+        //    {
+        //        foreach (var item in properties)
+        //        {
+        //            if (!logEvent.Properties.TryGetValue(item.Key, out _))
+        //            {
+        //                logEvent.Properties.Add(item.Key, item.Value);
+        //            }
+        //        }
+        //    }
 
-            return properties;
-        }
+        //    return properties;
+        //}
     }
 }

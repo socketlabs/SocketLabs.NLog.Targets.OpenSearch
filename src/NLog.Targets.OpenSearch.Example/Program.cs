@@ -26,7 +26,18 @@ namespace NLog.Targets.OpenSearch.Example
             {
                 using (logger.BeginScope(new[] { new KeyValuePair<string, object>("TransctionId", Guid.NewGuid().ToString()) }))
                 {
-                    logger.LogInformation("Hello OpenSearch Logging");
+                    var complexObject = new ComplexObject();
+                    Foo foo = new()
+                    {
+                        Bar = new string[] { "Bingo", "Bango", "Bango" },
+                        Baz = DateTimeOffset.Now,
+
+                        // Circular references are ignored.
+                        ComplexObject = complexObject
+                    };
+                    complexObject.Foo = foo;
+
+                    logger.LogInformation("Hello OpenSearch Logging, {ComplexObject}", complexObject);
 
                     try
                     {
