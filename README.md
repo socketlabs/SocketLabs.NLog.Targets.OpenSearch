@@ -85,9 +85,7 @@ Install-Package SocketLabs.NLog.Targets.OpenSearch
 ### Prerequisites
 
 * Visual Studio or VSCode
-* .NET 5
-
-1. CI builds are configured in [Azure DevOps](https://socketlabs.visualstudio.com/SocketLabs.NLog.Targets.OpenSearch/_build)
+* .NET 7
 
 ### Release History
 * 1.0.0 Initial Release
