@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using SocketLabs.NLog.Targets.OpenSearch.Models;
+﻿using SocketLabs.NLog.Targets.OpenSearch.Models;
 
 namespace SocketLabs.NLog.Targets.OpenSearch.Network
 {

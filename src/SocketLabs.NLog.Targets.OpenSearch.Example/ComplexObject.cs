@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace SocketLabs.NLog.Targets.OpenSearch.Example
 {
-    public class ComplexObject 
+    public class ComplexObject
     {
         public ComplexObject()
         {
         }
-
 
         public Foo Foo { get; set; }
 

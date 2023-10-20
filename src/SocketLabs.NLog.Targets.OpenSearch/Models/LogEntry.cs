@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text.Json.Serialization;
-
-namespace SocketLabs.NLog.Targets.OpenSearch.Models
+﻿namespace SocketLabs.NLog.Targets.OpenSearch.Models
 {
     internal class LogEntry : ILogEntry
     {

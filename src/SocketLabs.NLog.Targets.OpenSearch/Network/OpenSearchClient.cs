@@ -145,7 +145,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
                 }
 
                 throw new AggregateException("Unable to send bulk index request to any of the OpenSearch hosts. See InnerException for details.", errors!);
-
             }
             finally
             {

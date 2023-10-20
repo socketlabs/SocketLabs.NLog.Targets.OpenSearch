@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NLog;
-using NLog.Config;
-using NLog.Layouts;
+﻿using NLog;
 
 namespace SocketLabs.NLog.Targets.OpenSearch.Network
 {
@@ -19,8 +14,8 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
 
         public OpenSearchClientOptions(string[] uris)
         {
-            if (!uris.Any()) 
-                 throw new ArgumentException("No uris specified for OpenSearch hosts.", nameof(uris)); 
+            if (!uris.Any())
+                throw new ArgumentException("No uris specified for OpenSearch hosts.", nameof(uris));
 
             _uris = uris;
         }
@@ -29,7 +24,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
         /// Set it to true to enable HttpCompression (Must be enabled on server)
         /// </summary>
         public bool EnableHttpCompression { get; set; } = false;
-
 
         /// <summary>
         /// Gets or sets whether the OpenSearch client should validate any server certificates.
@@ -42,6 +36,5 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
         public string? CertificateThumprint { get; set; }
 
         public Action<Exception, LogLevel, string>? OnLogging { get; set; }
-
     }
 }

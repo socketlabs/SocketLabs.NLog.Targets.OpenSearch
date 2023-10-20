@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SocketLabs.NLog.Targets.OpenSearch.Models
+﻿namespace SocketLabs.NLog.Targets.OpenSearch.Models
 {
     internal class BulkIndexResponse
     {

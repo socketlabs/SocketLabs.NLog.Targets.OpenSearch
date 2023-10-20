@@ -1,13 +1,12 @@
-﻿using System;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 
 namespace SocketLabs.NLog.Targets.OpenSearch.Models
 {
     internal class BasicAuthenticationHeaderValue
     {
-        private BasicAuthenticationHeaderValue() 
-        {            
+        private BasicAuthenticationHeaderValue()
+        {
             // private ctor.
         }
 

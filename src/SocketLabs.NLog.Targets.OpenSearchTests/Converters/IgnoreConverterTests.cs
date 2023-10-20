@@ -1,12 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SocketLabs.NLog.Targets.OpenSearch.Converters;
-using SocketLabs.NLog.Targets.OpenSearchTests;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SocketLabs.NLog.Targets.OpenSearchTests;
 
 namespace SocketLabs.NLog.Targets.OpenSearch.Converters.Tests
 {
@@ -59,8 +56,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Converters.Tests
             var writer = new Utf8JsonWriter(new MemoryStream(), new JsonWriterOptions());
             converter.Write(writer, _testObj.Type, _jsonSerializerOptions);
         }
-
-
 
         [TestMethod]
         public void SerializationTest()

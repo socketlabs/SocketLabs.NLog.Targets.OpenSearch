@@ -1,11 +1,5 @@
 ﻿using NLog;
-using NLog.Layouts;
 using SocketLabs.NLog.Targets.OpenSearch.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection.Emit;
-using System.Text;
 
 namespace SocketLabs.NLog.Targets.OpenSearch.Extensions
 {
@@ -19,7 +13,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Extensions
                 throw new ArgumentNullException(nameof(index), "No index specified for OpenSearch");
 
             var entry = new LogEntry(index!);
-            var properties =  propertyRender?.Invoke();
+            var properties = propertyRender?.Invoke();
             properties ??= new Dictionary<string, object?>();
 
             properties.TryAdd("className", logEventInfo.CallerClassName);

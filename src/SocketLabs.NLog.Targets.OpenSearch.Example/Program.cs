@@ -1,15 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace SocketLabs.NLog.Targets.OpenSearch.Example
 {
     internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             IServiceCollection services = new ServiceCollection();
 
@@ -48,12 +48,10 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Example
                         var outerEx = new Exception("Ruh roh. Something went wrong.", innerEx);
 
                         throw outerEx;
-
                     }
                     catch (Exception ex)
                     {
                         logger.LogError(ex, "There was problem.");
-
                     }
 
                     Thread.Sleep(2000);

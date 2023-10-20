@@ -64,7 +64,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch
         /// </summary>
         public bool EnableHttpCompression { get; set; } = false;
 
-
         /// <summary>
         /// Gets or sets whether the OpenSearch client should validate any server certificates.
         /// </summary>
@@ -197,7 +196,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch
             //            {
             //                switch (item.Value)
             //                {
-
             //                    case bool _:
             //                    case byte _:
             //                    case DateTime _:
