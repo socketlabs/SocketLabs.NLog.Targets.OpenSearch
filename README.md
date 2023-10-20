@@ -1,6 +1,6 @@
 <img src="https://static.socketlabs.com/logos/logo-dark-sans-tag-507x64.png" alt="SocketLabs Logo" width="190" height="24" />  
 
-[![Build Status][build-status]](https://socketlabs.visualstudio.com/SocketLabs.NLog.Targets.OpenSearch/_build/latest?definitionId=4&branchName=main)  
+![Build status][build-status]
 
 # SocketLabs.NLog.Targets.OpenSearch
 > NLog Target for OpenSearch
@@ -97,4 +97,4 @@ This code base is licensed under the [MIT License](LICENSE.md).
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[build-status]: https://socketlabs.visualstudio.com/SocketLabs.NLog.Targets.OpenSearch/_apis/build/status/SocketLabs.NLog.Targets.OpenSearch-Azure-CI?branchName=main%2Fazure-pipelines
+[build-status]: https://dev.azure.com/socketlabs/Public%20Projects/_apis/build/status/SocketLabs.NLog.Targets.OpenSearch-CI?branchName=main
