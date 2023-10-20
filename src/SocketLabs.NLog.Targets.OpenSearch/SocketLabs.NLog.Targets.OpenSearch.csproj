@@ -10,7 +10,6 @@
 		<Authors>Matt Soler</Authors>
 		<PackageTags>opensearch,nlog,target,logging</PackageTags>
 		<PackageProjectUrl>https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch</PackageProjectUrl>
-		<PackageLicenseUrl>https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch/main/LICENSE.md</PackageLicenseUrl>
 		<RepositoryUrl>https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<AssemblyVersion>2.0.0.0</AssemblyVersion>
