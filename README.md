@@ -1,8 +1,8 @@
 <img src="https://static.socketlabs.com/logos/logo-dark-sans-tag-507x64.png" alt="SocketLabs Logo" width="190" height="24" />  
 
-[![Build Status][build-status]](https://socketlabs.visualstudio.com/NLog.Targets.OpenSearch/_build/latest?definitionId=4&branchName=main)  
+[![Build Status][build-status]](https://socketlabs.visualstudio.com/SocketLabs.NLog.Targets.OpenSearch/_build/latest?definitionId=4&branchName=main)  
 
-# NLog.Targets.OpenSearch
+# SocketLabs.NLog.Targets.OpenSearch
 > NLog Target for OpenSearch
 
 This NLog target is designed to specifically work with OpenSearch Versions >=1.0.  It is focused on performance, and doesn't require any third party clients.
@@ -13,12 +13,12 @@ Install the Nuget package
 
 ##### dotnet cli:
 ```bash
-dotnet add package NLog.Targets.OpenSearch
+dotnet add package SocketLabs.NLog.Targets.OpenSearch
 ```
 
 ##### Visual Studio
 ```powershell
-Install-Package NLog.Targets.OpenSearch
+Install-Package SocketLabs.NLog.Targets.OpenSearch
 ```  
 
 ##### Add NLog.config to your project
@@ -32,7 +32,7 @@ Install-Package NLog.Targets.OpenSearch
 			internalLogLevel="Warn" internalLogFile="logs/nlog-internal.log">
 
 	<extensions>
-		<add assembly="NLog.Targets.OpenSearch"/>
+		<add assembly="SocketLabs.NLog.Targets.OpenSearch"/>
 	</extensions>
 
 	<targets>
@@ -87,7 +87,7 @@ Install-Package NLog.Targets.OpenSearch
 * Visual Studio or VSCode
 * .NET 5
 
-1. CI builds are configured in [Azure DevOps](https://socketlabs.visualstudio.com/NLog.Targets.OpenSearch/_build)
+1. CI builds are configured in [Azure DevOps](https://socketlabs.visualstudio.com/SocketLabs.NLog.Targets.OpenSearch/_build)
 
 ### Release History
 * 1.0.0 Initial Release
@@ -97,4 +97,4 @@ This code base is licensed under the [MIT License](LICENSE.md).
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[build-status]: https://socketlabs.visualstudio.com/NLog.Targets.OpenSearch/_apis/build/status/NLog.Targets.OpenSearch-Azure-CI?branchName=main%2Fazure-pipelines
+[build-status]: https://socketlabs.visualstudio.com/SocketLabs.NLog.Targets.OpenSearch/_apis/build/status/SocketLabs.NLog.Targets.OpenSearch-Azure-CI?branchName=main%2Fazure-pipelines

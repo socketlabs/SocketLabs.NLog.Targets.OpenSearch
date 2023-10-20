@@ -1,7 +1,7 @@
-# Contributing to 'NLog.Targets.OpenSearch'
+# Contributing to 'SocketLabs.NLog.Targets.OpenSearch'
 
 If you discover issues, have ideas for improvements or new features,
-please report them to the [issue tracker](https://github.com/socketlabs/NLog.Targets.OpenSearch/issues) of the repository or
+please report them to the [issue tracker](https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch/issues) of the repository or
 submit a pull request. Please, try to follow these guidelines when you
 do so.
 
@@ -18,16 +18,16 @@ do so.
 ## Want a Feature?
 
 You can request a new feature by submitting an issue to our
-[GitHub Repository](https://github.com/socketlabs/NLog.Targets.OpenSearch). If you would like to implement a new feature then
+[GitHub Repository](https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch). If you would like to implement a new feature then
 consider what kind of change it is:
 
 * **Major Changes** that you wish to contribute to the project should be
-  discussed first with `NLog.Targets.OpenSearch` contributors in an issue or pull request so
+  discussed first with `SocketLabs.NLog.Targets.OpenSearch` contributors in an issue or pull request so
   that we can develop a proper solution and better coordinate our efforts,
   prevent duplication of work, and help you to craft the change so that it is
   successfully accepted into the project.
 * **Small Changes** can be crafted and submitted to the
-  [GitHub Repository](https://github.com/socketlabs/NLog.Targets.OpenSearch) as a Pull Request.
+  [GitHub Repository](https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch) as a Pull Request.
   
   ## Creating a Pull Request?
   
