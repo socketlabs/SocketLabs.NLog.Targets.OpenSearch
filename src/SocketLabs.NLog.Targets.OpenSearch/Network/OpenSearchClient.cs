@@ -45,6 +45,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
+            _jsonSerializerOptions.Converters.Add(new CustomUnsupportedTypeConverterFactory());
         }
 
         public async Task<BulkIndexResponse?> BulkIndexAsync<T>(IEnumerable<T> items, Func<T, BulkItemDescriptor, BulkItemDescriptor> bulkItem, CancellationToken token) where T : ILogEntry

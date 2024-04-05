@@ -6,6 +6,10 @@ using SocketLabs.NLog.Targets.OpenSearch.Network;
 using NLog.Targets;
 using NLog;
 using NLog.Targets.Wrappers;
+using System.Collections.Generic;
+using System.ComponentModel;
+
+
 
 #if NETCOREAPP
 using Microsoft.AspNetCore.Routing;
@@ -122,7 +126,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                         FilterProperties(properties);
                         FixProperties(properties);
                         RemoveUnserializablePropertyTypes(properties);
-
                         return properties;
                     })
                 );
