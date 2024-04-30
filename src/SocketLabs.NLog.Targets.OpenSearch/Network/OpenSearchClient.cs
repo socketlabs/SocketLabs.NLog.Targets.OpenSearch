@@ -53,7 +53,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
             Stream stream = default!;
             try
             {
-                var ms = (RecyclableMemoryStream)_memoryStreamManager.GetStream();
+                var ms = _memoryStreamManager.GetStream();
 
                 if (_useCompression)
                 {
