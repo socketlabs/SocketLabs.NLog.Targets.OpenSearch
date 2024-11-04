@@ -55,18 +55,39 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Extensions
 
         private static void FixupIpForwarded(IDictionary<string, object?> knownProperties)
         {
-            // the ip-forwarded property is actually an endpoint like this 127.0.0.1:1234 so we split it out 
+            // the ip-forwarded property is actually an endpoint like this ::ffff:127.0.0.1:1234 so we split it out 
             const string ipForwardedKey = "aspnet.request.ip-forwarded";
             const string ipForwardedPort = "aspnet.request.port-forwarded";
 
             if (knownProperties.TryGetValue(ipForwardedKey, out var value) && value is string ipForwarded)
             {
-                var parts = ipForwarded.Split([':'], options: StringSplitOptions.RemoveEmptyEntries);
+                var portSeperatorIndex = ipForwarded.LastIndexOf(':');
 
-                if (parts.Length == 2)
+                if (portSeperatorIndex != -1)
                 {
-                    knownProperties[ipForwardedKey] = parts[0];
-                    knownProperties.TryAdd(ipForwardedPort, TryConvertToNumber(parts[1]));
+                    var span = ipForwarded.AsSpan();
+                    var ipSpan = span.Slice(0, portSeperatorIndex);
+                    var portSpan = span.Slice(portSeperatorIndex + 1);
+
+#if NETSTANDARD2_0
+                    if (IPAddress.TryParse(ipSpan.ToString(), out var ipAddress))
+                    {
+                        knownProperties[ipForwardedKey] = ipAddress.ToString();
+                    }
+                    if (int.TryParse(portSpan.ToString(), out int portForwarded))
+                    {
+                        knownProperties.TryAdd(ipForwardedPort, portForwarded);
+                    }
+#else
+                    if (IPAddress.TryParse(ipSpan, out var ipAddress))
+                    {
+                        knownProperties[ipForwardedKey] = ipAddress.ToString();
+                    }
+                    if (int.TryParse(portSpan, out int portForwarded))
+                    {
+                        knownProperties.TryAdd(ipForwardedPort, portForwarded);
+                    }
+#endif
                 }
             }
         }
