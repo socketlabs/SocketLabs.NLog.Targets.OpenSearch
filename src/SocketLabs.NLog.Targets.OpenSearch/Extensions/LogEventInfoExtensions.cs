@@ -49,6 +49,26 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Extensions
                     knownProperties[item.Key] = TryConvertToBoolean(knownProperties[item.Key]);
                 }
             }
+
+            FixupIpForwarded(knownProperties);
+        }
+
+        private static void FixupIpForwarded(IDictionary<string, object?> knownProperties)
+        {
+            // the ip-forwarded property is actually an endpoint like this 127.0.0.1:1234 so we split it out 
+            const string ipForwardedKey = "aspnet.request.ip-forwarded";
+            const string ipForwardedPort = "aspnet.request.port-forwarded";
+
+            if (knownProperties.TryGetValue(ipForwardedKey, out var value) && value is string ipForwarded)
+            {
+                var parts = ipForwarded.Split([':'], options: StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 2)
+                {
+                    knownProperties[ipForwardedKey] = parts[0];
+                    knownProperties.TryAdd(ipForwardedPort, TryConvertToNumber(parts[1]));
+                }
+            }
         }
 
         private static object? TryConvertToIPAddress(object? value)
