@@ -145,7 +145,8 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                         {
                             if (item.Index?.Error == null) continue;
 
-                            InternalLogger.Log(LogLevel.Error, "Error adding log: {0} Index: {1} StatusCode: {2}", item.Index.Error.Reason, item.Index.Index, item.Index.Status);
+                            InternalLogger.Log(LogLevel.Error, "Error adding log - Type: {0}, Reason: {1}, Index: {2}, StatusCode: {3}", 
+                                item.Index.Error.Type, item.Index.Error.Reason, item.Index.Index, item.Index.Status);
                         }
                     }
                 }
