@@ -128,6 +128,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
 
                         FilterProperties(properties);
                         FixProperties(properties);
+                        TruncateLongStringValues(properties);
                         RemoveUnserializablePropertyTypes(properties);
                         return properties;
                     })
@@ -153,7 +154,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                             
                             if (InternalLogger.IsTraceEnabled)
                             {
-                                var rawEventsJson = JsonSerializer.Serialize(logEvents, JsonSerializerDefaultOptions.Indented);
+                                var rawEventsJson = JsonSerializer.Serialize(logs, JsonSerializerDefaultOptions.Indented);
                                 InternalLogger.Log(LogLevel.Trace, "Events that were attempted:\r\n{0}", rawEventsJson);
                             }
                         }
@@ -184,6 +185,14 @@ namespace SocketLabs.NLog.Targets.OpenSearch
 
         private static void FixProperties(IDictionary<string, object> properties)
         {
+            // Opensearch must use this internally and causes an error when it exists
+            // so rename it.
+            if (properties.TryGetValue("requestId", out var requestIdValue))
+            {
+                properties.Remove("requestId");
+                properties.TryAdd("request.requestId", requestIdValue);
+            }
+
             if (properties.TryGetValue("EventId", out var value))
             {
                 if (value is Microsoft.Extensions.Logging.EventId eventId)
@@ -194,6 +203,17 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                     {
                         properties.TryAdd("EventName", eventId.Name!);
                     }
+                }
+            }
+        }
+
+        private static void TruncateLongStringValues(IDictionary<string, object?> properties)
+        {
+            foreach (var item in properties)
+            {
+                if (item.Value is string value)
+                {
+                    properties[item.Key] = value.Truncate(32768);
                 }
             }
         }
