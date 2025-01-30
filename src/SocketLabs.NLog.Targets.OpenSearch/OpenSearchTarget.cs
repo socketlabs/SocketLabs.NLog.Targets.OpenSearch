@@ -8,6 +8,9 @@ using NLog;
 using NLog.Targets.Wrappers;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json;
+using SocketLabs.NLog.Targets.OpenSearch.Utilities;
+
 
 
 
@@ -147,6 +150,12 @@ namespace SocketLabs.NLog.Targets.OpenSearch
 
                             InternalLogger.Log(LogLevel.Error, "Error adding log - Type: {0}, Reason: {1}, Index: {2}, StatusCode: {3}", 
                                 item.Index.Error.Type, item.Index.Error.Reason, item.Index.Index, item.Index.Status);
+                            
+                            if (InternalLogger.IsTraceEnabled)
+                            {
+                                var rawEventsJson = JsonSerializer.Serialize(logEvents, JsonSerializerDefaultOptions.Indented);
+                                InternalLogger.Log(LogLevel.Trace, "Events that were attempted:\r\n{0}", rawEventsJson);
+                            }
                         }
                     }
                 }
