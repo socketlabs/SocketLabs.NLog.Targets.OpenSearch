@@ -1,22 +1,13 @@
-﻿using NLog.Common;
+﻿using System.Text.Json;
+using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
+using NLog.Targets;
+using NLog.Targets.Wrappers;
 using SocketLabs.NLog.Targets.OpenSearch.Extensions;
 using SocketLabs.NLog.Targets.OpenSearch.Network;
-using NLog.Targets;
-using NLog;
-using NLog.Targets.Wrappers;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text.Json;
 using SocketLabs.NLog.Targets.OpenSearch.Utilities;
-
-
-
-
-#if NETCOREAPP
-using Microsoft.AspNetCore.Routing;
-#endif
 
 namespace SocketLabs.NLog.Targets.OpenSearch
 {
@@ -149,9 +140,9 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                         {
                             if (item.Index?.Error == null) continue;
 
-                            InternalLogger.Log(LogLevel.Error, "Error adding log - Type: {0}, Reason: {1}, Index: {2}, StatusCode: {3}", 
+                            InternalLogger.Log(LogLevel.Error, "Error adding log - Type: {0}, Reason: {1}, Index: {2}, StatusCode: {3}",
                                 item.Index.Error.Type, item.Index.Error.Reason, item.Index.Index, item.Index.Status);
-                            
+
                             if (InternalLogger.IsTraceEnabled)
                             {
                                 var rawEventsJson = JsonSerializer.Serialize(logs, JsonSerializerDefaultOptions.Indented);

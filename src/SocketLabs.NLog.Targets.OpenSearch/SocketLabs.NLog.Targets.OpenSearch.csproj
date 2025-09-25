@@ -40,20 +40,18 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-		<PackageReference Include="System.Text.Json" Version="6.0.10" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.4" />
+		<PackageReference Include="System.Text.Json" Version="6.0.11" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' != 'net461'">
-		<PackageReference Include="System.Text.Json" Version="8.0.5" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+		<PackageReference Include="System.Text.Json" Version="9.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
-		<Compile Include="Converters\RouteEndpointConverter.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
-		<PackageReference Include="NLog" Version="5.3.4" />
+		<PackageReference Include="NLog" Version="6.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>

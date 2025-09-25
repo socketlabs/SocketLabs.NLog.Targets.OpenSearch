@@ -39,9 +39,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
                 DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
             };
-#if NETCOREAPP
-            _jsonSerializerOptions.Converters.Add(new RouteEndpointConverter());
-#endif
+
             _jsonSerializerOptions.Converters.Add(new HttpMethodConverter());
             _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
             _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
