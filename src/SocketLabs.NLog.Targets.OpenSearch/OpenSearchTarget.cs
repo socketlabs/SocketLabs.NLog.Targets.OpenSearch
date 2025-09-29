@@ -134,6 +134,8 @@ namespace SocketLabs.NLog.Targets.OpenSearch
 
                 if (result?.Errors == true)
                 {
+                    InternalLogger.Log(LogLevel.Error, "Error adding {0} log events to OpenSearch", logEvents.Count());
+
                     if (result.Items.Any(x => x.Index?.Error != null))
                     {
                         foreach (var item in result.Items.Where(x => !x.Index?.IsValid == true))
@@ -150,6 +152,10 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                             }
                         }
                     }
+                }
+                else
+                {
+                    InternalLogger.Log(LogLevel.Trace, "Successfully added {0} log events to OpenSearch", logEvents.Count());
                 }
             }
             catch (Exception ex)
