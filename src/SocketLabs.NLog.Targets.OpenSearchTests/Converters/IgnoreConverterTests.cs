@@ -42,7 +42,8 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Converters.Tests
         public void ReadTest()
         {
             var converter = new IgnoreTypeConverter();
-            Assert.ThrowsException<NotSupportedException>(action: () =>
+
+            Assert.Throws<NotSupportedException>(action: () =>
             {
                 var reader = new Utf8JsonReader();
                 converter.Read(ref reader, null, _jsonSerializerOptions);
