@@ -1,13 +1,14 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using NLog;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
+using SocketLabs.NLog.Targets.OpenSearch.Converters;
 using SocketLabs.NLog.Targets.OpenSearch.Extensions;
 using SocketLabs.NLog.Targets.OpenSearch.Network;
-using SocketLabs.NLog.Targets.OpenSearch.Utilities;
 
 namespace SocketLabs.NLog.Targets.OpenSearch
 {
@@ -17,7 +18,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
         private string[]? _uris;
         private readonly char[] _split = new char[] { ',' };
         private OpenSearchClient _client = default!;
-
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
         public OpenSearchTarget()
         {
             RetryCount = 10;
@@ -28,6 +29,21 @@ namespace SocketLabs.NLog.Targets.OpenSearch
             IncludeCallSite = true;
             IncludeCallSiteStackTrace = true;
             IncludeScopeProperties = true;
+
+            _jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            _jsonSerializerOptions.Converters.Add(new HttpMethodConverter());
+            _jsonSerializerOptions.Converters.Add(new ExceptionConverter());
+            _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            _jsonSerializerOptions.Converters.Add(new LogLevelConverter());
+            _jsonSerializerOptions.Converters.Add(new CustomUnsupportedTypeConverterFactory());
         }
 
         public string? Username { get; set; }
@@ -147,7 +163,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
 
                             if (InternalLogger.IsTraceEnabled)
                             {
-                                var rawEventsJson = JsonSerializer.Serialize(logs, JsonSerializerDefaultOptions.Indented);
+                                var rawEventsJson = JsonSerializer.Serialize(logs, _jsonSerializerOptions);
                                 InternalLogger.Log(LogLevel.Trace, "Events that were attempted:\r\n{0}", rawEventsJson);
                             }
                         }
@@ -200,6 +216,30 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                     {
                         properties.TryAdd("EventName", eventId.Name!);
                     }
+                }
+            }
+
+            if (properties.TryGetValue("Host", out var hostValue))
+            {
+                if (hostValue is not string)
+                {
+                    properties["Host"] = hostValue.ToString()!;
+                }
+            }
+
+            if (properties.TryGetValue("PathBase", out var pathBaseValue))
+            {
+                if (pathBaseValue is not string)
+                {
+                    properties["PathBase"] = pathBaseValue.ToString()!;
+                }
+            }
+
+            if (properties.TryGetValue("Path", out var pathValue))
+            {
+                if (pathValue is not string and not null)
+                {
+                    properties["Path"] = pathValue.ToString()!;
                 }
             }
         }
