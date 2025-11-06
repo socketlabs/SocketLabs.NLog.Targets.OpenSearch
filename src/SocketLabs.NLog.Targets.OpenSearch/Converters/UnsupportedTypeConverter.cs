@@ -12,12 +12,21 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Converters
     {
         public override bool CanConvert(Type type)
         {
-            if (!typeof(MemberInfo).IsAssignableFrom(type) && !(type == typeof(SerializationInfo)) && !(type == typeof(IntPtr)) && !(type == typeof(UIntPtr)))
-            {
-                return typeof(Delegate).IsAssignableFrom(type);
-            }
+            // If a type is added, also add to the SourceGeneration project.
 
-            return true;
+            return
+                // There's no safe way to construct a Type/MemberInfo from untrusted user input.
+                typeof(MemberInfo).IsAssignableFrom(type) ||
+                // (De)serialization of SerializationInfo is already disallowed due to Type being disallowed
+                // (the two ctors on SerializationInfo take a Type, and a Type member is present when serializing).
+                // Explicitly disallowing this type provides a clear exception when ctors with
+                // .ctor(SerializationInfo, StreamingContext) signatures are attempted to be used for deserialization.
+                // Invoking such ctors is not safe when used with untrusted user input.
+                type == typeof(SerializationInfo) ||
+                type == typeof(IntPtr) ||
+                type == typeof(UIntPtr) ||
+                // Exclude delegates.
+                typeof(Delegate).IsAssignableFrom(type);
         }
 
         public override JsonConverter? CreateConverter(Type type, JsonSerializerOptions options)
@@ -33,10 +42,20 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Converters
             return default;
         }
 
+        public override T ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return default!;
+        }
+
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
             writer.WriteNullValue();
             // Do nothing!
+        }
+
+        public override void WriteAsPropertyName(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+        {
+            writer.WritePropertyName(value?.ToString() ?? string.Empty);
         }
     }
 }
