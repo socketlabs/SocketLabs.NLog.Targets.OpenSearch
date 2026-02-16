@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 using NLog;
 using NLog.Common;
-using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
@@ -70,7 +69,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch
         /// <summary>
         /// Gets or sets the name of the OpenSearch index to write to.
         /// </summary>
-        [RequiredParameter]
         public Layout Index { get; set; } = "nlog-${date:format=yyyy.MM.dd}";
 
         /// <summary>
@@ -133,6 +131,9 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                     {
                         var properties = GetAllProperties(log);
 
+                        if (properties is null)
+                            return new Dictionary<string, object?>();
+
                         FilterProperties(properties);
                         FixProperties(properties);
                         TruncateLongStringValues(properties);
@@ -182,7 +183,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
             }
         }
 
-        private static void FilterProperties(IDictionary<string, object> properties)
+        private static void FilterProperties(IDictionary<string, object?> properties)
         {
             properties.Remove("EventId_Id");
             properties.Remove("EventId_Name");
@@ -196,7 +197,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
             }
         }
 
-        private static void FixProperties(IDictionary<string, object> properties)
+        private static void FixProperties(IDictionary<string, object?> properties)
         {
             // Opensearch must use this internally and causes an error when it exists
             // so rename it.
@@ -221,25 +222,33 @@ namespace SocketLabs.NLog.Targets.OpenSearch
 
             if (properties.TryGetValue("Host", out var hostValue))
             {
-                if (hostValue is not string)
+                if (hostValue is not null)
                 {
-                    properties["Host"] = hostValue.ToString()!;
+                    properties["Host"] = hostValue.ToString();
                 }
             }
 
             if (properties.TryGetValue("PathBase", out var pathBaseValue))
             {
-                if (pathBaseValue is not string)
+                if (pathBaseValue is not null)
                 {
-                    properties["PathBase"] = pathBaseValue.ToString()!;
+                    properties["PathBase"] = pathBaseValue.ToString();
                 }
             }
 
             if (properties.TryGetValue("Path", out var pathValue))
             {
-                if (pathValue is not string and not null)
+                if (pathValue is not null)
                 {
                     properties["Path"] = pathValue.ToString()!;
+                }
+            }
+
+            if (properties.TryGetValue("path", out var pathValue2))
+            {
+                if (pathValue2 is not null)
+                {
+                    properties["path"] = pathValue2.ToString()!;
                 }
             }
         }
@@ -260,7 +269,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
             await BulkIndexAsync(logEvents, cancellationToken);
         }
 
-        private static void RemoveUnserializablePropertyTypes(IDictionary<string, object> properties)
+        private static void RemoveUnserializablePropertyTypes(IDictionary<string, object?> properties)
         {
             //            foreach (var item in properties)
             //            {
