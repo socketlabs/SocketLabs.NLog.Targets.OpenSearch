@@ -12,7 +12,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Converters
 
             if (!string.IsNullOrEmpty(level))
             {
-                return LogLevel.FromString(level);
+                return LogLevel.FromString(level!);
             }
 
             return null;
