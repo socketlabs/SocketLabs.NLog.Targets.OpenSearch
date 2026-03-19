@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Company>SocketLabs</Company>
 		<Description>NLog Target for OpenSearch</Description>
-		<Copyright>© 2025 SocketLabs Acquisition, LLC. All rights reserved.</Copyright>
+		<Copyright>©2026 SocketLabs Acquisition, LLC. All rights reserved.</Copyright>
 		<Authors>Matt Soler</Authors>
 		<PackageTags>opensearch,nlog,target,logging</PackageTags>
 		<PackageProjectUrl>https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/socketlabs/SocketLabs.NLog.Targets.OpenSearch</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<AssemblyVersion>2.0.0.0</AssemblyVersion>
-		<FileVersion>2.0.0.0</FileVersion>
+		<AssemblyVersion>3.0.0.0</AssemblyVersion>
+		<FileVersion>3.0.0.0</FileVersion>
 		<LangVersion>Latest</LangVersion>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>

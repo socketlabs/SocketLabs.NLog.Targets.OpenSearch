@@ -69,21 +69,21 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Extensions
                     var ipSpan = span.Slice(0, portSeperatorIndex);
                     var portSpan = span.Slice(portSeperatorIndex + 1);
 
-#if NETSTANDARD2_0
-                    if (IPAddress.TryParse(ipSpan.ToString(), out var ipAddress))
-                    {
-                        knownProperties[ipForwardedKey] = ipAddress.ToString();
-                    }
-                    if (int.TryParse(portSpan.ToString(), out int portForwarded))
-                    {
-                        knownProperties.TryAdd(ipForwardedPort, portForwarded);
-                    }
-#else
+#if NETCOREAPP
                     if (IPAddress.TryParse(ipSpan, out var ipAddress))
                     {
                         knownProperties[ipForwardedKey] = ipAddress.ToString();
                     }
                     if (int.TryParse(portSpan, out int portForwarded))
+                    {
+                        knownProperties.TryAdd(ipForwardedPort, portForwarded);
+                    }
+#else
+                    if (IPAddress.TryParse(ipSpan.ToString(), out var ipAddress))
+                    {
+                        knownProperties[ipForwardedKey] = ipAddress.ToString();
+                    }
+                    if (int.TryParse(portSpan.ToString(), out int portForwarded))
                     {
                         knownProperties.TryAdd(ipForwardedPort, portForwarded);
                     }

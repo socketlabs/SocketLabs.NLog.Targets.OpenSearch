@@ -137,7 +137,6 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                         FilterProperties(properties);
                         FixProperties(properties);
                         TruncateLongStringValues(properties);
-                        RemoveUnserializablePropertyTypes(properties);
                         return properties;
                     })
                 );
@@ -188,6 +187,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch
             properties.Remove("EventId_Id");
             properties.Remove("EventId_Name");
 
+#if NETCOREAPP
             foreach (var item in properties)
             {
                 if (item.Value == null)
@@ -195,6 +195,17 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                     properties.Remove(item);
                 }
             }
+#else
+            // In .NET Framework, we cannot modify the collection while iterating, so we need to get the keys first.
+            var keys = properties.Keys.ToList();
+            foreach (var key in keys)
+            {
+                if (properties[key] == null)
+                {
+                    properties.Remove(key);
+                }
+            }
+#endif
         }
 
         private static void FixProperties(IDictionary<string, object?> properties)
@@ -255,6 +266,9 @@ namespace SocketLabs.NLog.Targets.OpenSearch
 
         private static void TruncateLongStringValues(IDictionary<string, object?> properties)
         {
+
+#if NETCOREAPP
+
             foreach (var item in properties)
             {
                 if (item.Value is string value)
@@ -262,69 +276,24 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                     properties[item.Key] = value.Truncate(32768);
                 }
             }
+
+#elif NETSTANDARD2_0
+            // In .NET Framework, we cannot modify the collection while iterating, so we need to get the keys first.
+            var keys = properties.Keys.ToList();
+            foreach (var key in keys)
+            {
+                if (properties[key] is string value)
+                {
+                    properties[key] = value.Truncate(32768);
+                }
+            }
+#endif
+
         }
 
         protected override async Task WriteAsyncTask(IList<LogEventInfo> logEvents, CancellationToken cancellationToken)
         {
             await BulkIndexAsync(logEvents, cancellationToken);
         }
-
-        private static void RemoveUnserializablePropertyTypes(IDictionary<string, object?> properties)
-        {
-            //            foreach (var item in properties)
-            //            {
-            //                switch (item.Value)
-            //                {
-            //                    case bool _:
-            //                    case byte _:
-            //                    case DateTime _:
-            //                    case DateTimeOffset _:
-            //                    case decimal _:
-            //                    case double _:
-            //                    case Enum _:
-            //                    case Guid _:
-            //                    case short _:
-            //                    case int _:
-            //                    case long _:
-            //                    case sbyte _:
-            //                    case float _:
-            //                    case string _:
-            //                    case ushort _:
-            //                    case uint _:
-            //                    case ulong _:
-            //                    case LogLevel _:
-            //#if NETCOREAPP
-            //                    case RouteEndpoint _:
-            //#endif
-            //                    case TimeSpan _:
-            //                        break;
-            //                    case IPAddress ip:
-            //                        properties[item.Key] = ip.ToString();
-            //                        break;
-            //                    default:
-            //                        InternalLogger.Log(LogLevel.Trace, "Removed unserializable property of type {0}", item.Value.GetType().FullName);
-            //                        properties.Remove(item);
-            //                        break;
-            //                }
-            //            }
-        }
-
-        //protected override IDictionary<string, object?>? CaptureScopeContextProperties(LogEventInfo logEvent, IDictionary<string, object?> contextProperties)
-        //{
-        //    var properties = base.CaptureScopeContextProperties(logEvent, contextProperties);
-
-        //    if (IncludeScopeProperties && properties != null)
-        //    {
-        //        foreach (var item in properties)
-        //        {
-        //            if (!logEvent.Properties.TryGetValue(item.Key, out _))
-        //            {
-        //                logEvent.Properties.Add(item.Key, item.Value);
-        //            }
-        //        }
-        //    }
-
-        //    return properties;
-        //}
     }
 }
