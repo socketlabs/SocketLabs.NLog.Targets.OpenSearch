@@ -37,7 +37,7 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Extensions
 
         private static void FixUpKnownProperties(IDictionary<string, object?> knownProperties)
         {
-
+#if NETCOREAPP
             foreach (var item in knownProperties)
             {
                 if (_numbers.Contains(item.Key))
@@ -49,6 +49,23 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Extensions
                     knownProperties[item.Key] = TryConvertToBoolean(knownProperties[item.Key]);
                 }
             }
+#else
+            // In .NET Framework, we cannot modify the collection while iterating, so we need to get the keys first.
+            var keys = knownProperties.Keys.ToList();
+            foreach (var key in keys)
+            {
+                if (_numbers.Contains(key))
+                {
+                    knownProperties[key] = TryConvertToNumber(knownProperties[key]);
+                }
+                else if (_booleans.Contains(key))
+                {
+                    knownProperties[key] = TryConvertToBoolean(knownProperties[key]);
+                }
+            }
+#endif
+
+
 
             FixupIpForwarded(knownProperties);
         }
