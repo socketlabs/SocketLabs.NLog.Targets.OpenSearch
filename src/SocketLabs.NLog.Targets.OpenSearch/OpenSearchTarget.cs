@@ -86,6 +86,18 @@ namespace SocketLabs.NLog.Targets.OpenSearch
         /// </summary>
         public string? CertificateThumprint { get; set; }
 
+        /// <summary>
+        /// Gets or sets the maximum number of idle bytes the small-buffer pool is allowed to
+        /// retain before releasing them back to the GC. Defaults to 100MB.
+        /// </summary>
+        public long MaximumSmallPoolFreeBytes { get; set; } = 100 * 1024 * 1024;
+
+        /// <summary>
+        /// Gets or sets the maximum number of idle bytes the large-buffer pool is allowed to
+        /// retain before releasing them back to the GC. Defaults to 200MB.
+        /// </summary>
+        public long MaximumLargePoolFreeBytes { get; set; } = 200 * 1024 * 1024;
+
         protected override void CloseTarget()
         {
             base.CloseTarget();
@@ -107,7 +119,9 @@ namespace SocketLabs.NLog.Targets.OpenSearch
                 OnLogging = InternalLogger.Log,
                 CertificateThumprint = CertificateThumprint,
                 Password = Password,
-                Username = Username
+                Username = Username,
+                MaximumSmallPoolFreeBytes = MaximumSmallPoolFreeBytes,
+                MaximumLargePoolFreeBytes = MaximumLargePoolFreeBytes
             };
 
             _client = new OpenSearchClient(options);

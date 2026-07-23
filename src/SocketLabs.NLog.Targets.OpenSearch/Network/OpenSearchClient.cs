@@ -23,7 +23,14 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
 
         public OpenSearchClient(OpenSearchClientOptions options)
         {
-            _memoryStreamManager = new RecyclableMemoryStreamManager();
+            // Default MaximumSmallPoolFreeBytes/MaximumLargePoolFreeBytes are 0 (unbounded), so the
+            // pool never releases idle buffers after a burst - it just holds the peak forever, which
+            // has been observed to consume several hundred MB of idle memory in production.
+            _memoryStreamManager = new RecyclableMemoryStreamManager(new RecyclableMemoryStreamManager.Options
+            {
+                MaximumSmallPoolFreeBytes = options.MaximumSmallPoolFreeBytes,
+                MaximumLargePoolFreeBytes = options.MaximumLargePoolFreeBytes,
+            });
             _client = new HttpClient(ConfigureClientHandler(options.CertificateThumprint, options.ValidateCertificates));
 
             if (!string.IsNullOrEmpty(options.Username) && !string.IsNullOrEmpty(options.Password))
