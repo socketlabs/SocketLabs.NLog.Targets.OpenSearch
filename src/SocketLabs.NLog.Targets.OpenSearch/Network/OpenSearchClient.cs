@@ -28,8 +28,8 @@ namespace SocketLabs.NLog.Targets.OpenSearch.Network
             // has been observed to consume several hundred MB of idle memory in production.
             _memoryStreamManager = new RecyclableMemoryStreamManager(new RecyclableMemoryStreamManager.Options
             {
-                MaximumSmallPoolFreeBytes = 100 * 1024 * 1024,
-                MaximumLargePoolFreeBytes = 200 * 1024 * 1024,
+                MaximumSmallPoolFreeBytes = options.MaximumSmallPoolFreeBytes,
+                MaximumLargePoolFreeBytes = options.MaximumLargePoolFreeBytes,
             });
             _client = new HttpClient(ConfigureClientHandler(options.CertificateThumprint, options.ValidateCertificates));
 
